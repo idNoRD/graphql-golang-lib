@@ -1,21 +1,19 @@
 package ast
 
-import "github.com/gqlhub/gqlhub-core/token"
-
 // Node is base interface for all AST nodes.
 type Node interface {
-	Pos() token.Pos // Returns starting position of node.
-	End() token.Pos // Returns ending position of node.
+	Pos() int // Returns starting position of node.
+	End() int // Returns ending position of node.
 }
 
 // Document is root node.
 type Document struct {
-	Position    token.Pos
+	Position    int
 	Definitions []Definition
 }
 
-func (d *Document) Pos() token.Pos { return d.Position }
-func (d *Document) End() token.Pos { return -1 }
+func (d *Document) Pos() int { return d.Position }
+func (d *Document) End() int { return -1 }
 
 // Definition can be Executable, TypeSystem, or Extension.
 type Definition interface {
@@ -38,7 +36,7 @@ const (
 //
 // https://spec.graphql.org/draft/#OperationDefinition
 type OperationDefinition struct {
-	Position      token.Pos
+	Position      int
 	OperationType OperationType
 	Name          *Name
 	VariableDefs  VariablesDefinition
@@ -46,23 +44,23 @@ type OperationDefinition struct {
 	SelectionSet  SelectionSet
 }
 
-func (o *OperationDefinition) Pos() token.Pos  { return o.Position }
-func (o *OperationDefinition) End() token.Pos  { return -1 }
+func (o *OperationDefinition) Pos() int        { return o.Position }
+func (o *OperationDefinition) End() int        { return -1 }
 func (o *OperationDefinition) definitionNode() {}
 
 // FragmentDefinition
 //
 // https://spec.graphql.org/draft/#FragmentDefinition
 type FragmentDefinition struct {
-	Position      token.Pos
+	Position      int
 	Name          Name
 	TypeCondition NamedType
 	Directives    Directives
 	SelectionSet  SelectionSet
 }
 
-func (f *FragmentDefinition) Pos() token.Pos  { return f.Position }
-func (f *FragmentDefinition) End() token.Pos  { return -1 }
+func (f *FragmentDefinition) Pos() int        { return f.Position }
+func (f *FragmentDefinition) End() int        { return -1 }
 func (f *FragmentDefinition) definitionNode() {}
 
 // TypeDefinition covers schema, scalar, object, interface, union, enum, input.
@@ -77,14 +75,14 @@ type TypeDefinition interface {
 //
 // https://spec.graphql.org/draft/#SchemaDefinition
 type SchemaDefinition struct {
-	Position          token.Pos
+	Position          int
 	Description       *StringValue
 	Directives        []Directive
 	RootOperationDefs []RootOperationTypeDefinition
 }
 
-func (s *SchemaDefinition) Pos() token.Pos            { return s.Position }
-func (s *SchemaDefinition) End() token.Pos            { return -1 }
+func (s *SchemaDefinition) Pos() int                  { return s.Position }
+func (s *SchemaDefinition) End() int                  { return -1 }
 func (s *SchemaDefinition) definitionNode()           {}
 func (s *SchemaDefinition) typeSystemDefinitionNode() {}
 
@@ -92,25 +90,25 @@ func (s *SchemaDefinition) typeSystemDefinitionNode() {}
 //
 // https://spec.graphql.org/draft/#RootOperationTypeDefinition
 type RootOperationTypeDefinition struct {
-	Position      token.Pos
+	Position      int
 	OperationType OperationType
 	Type          NamedType
 }
 
-func (r *RootOperationTypeDefinition) Pos() token.Pos { return r.Position }
-func (r *RootOperationTypeDefinition) End() token.Pos { return -1 }
+func (r *RootOperationTypeDefinition) Pos() int { return r.Position }
+func (r *RootOperationTypeDefinition) End() int { return -1 }
 
 // ScalarTypeExtension
 //
 // https://spec.graphql.org/draft/#ScalarTypeExtension
 type ScalarTypeExtension struct {
-	Position   token.Pos
+	Position   int
 	Name       Name
 	Directives []Directive
 }
 
-func (s *ScalarTypeExtension) Pos() token.Pos           { return s.Position }
-func (s *ScalarTypeExtension) End() token.Pos           { return -1 }
+func (s *ScalarTypeExtension) Pos() int                 { return s.Position }
+func (s *ScalarTypeExtension) End() int                 { return -1 }
 func (s *ScalarTypeExtension) definitionNode()          {}
 func (s *ScalarTypeExtension) typeSystemExtensionNode() {}
 
@@ -118,15 +116,15 @@ func (s *ScalarTypeExtension) typeSystemExtensionNode() {}
 //
 // https://spec.graphql.org/draft/#ObjectTypeExtension
 type ObjectTypeExtension struct {
-	Position   token.Pos
+	Position   int
 	Name       Name
 	Interfaces []NamedType
 	Directives []Directive
 	Fields     []FieldDefinition
 }
 
-func (o *ObjectTypeExtension) Pos() token.Pos           { return o.Position }
-func (o *ObjectTypeExtension) End() token.Pos           { return -1 }
+func (o *ObjectTypeExtension) Pos() int                 { return o.Position }
+func (o *ObjectTypeExtension) End() int                 { return -1 }
 func (o *ObjectTypeExtension) definitionNode()          {}
 func (o *ObjectTypeExtension) typeSystemExtensionNode() {}
 
@@ -136,7 +134,7 @@ func (o *ObjectTypeExtension) typeSystemExtensionNode() {}
 //
 // https://spec.graphql.org/draft/#FieldDefinition
 type FieldDefinition struct {
-	Position    token.Pos
+	Position    int
 	Description *StringValue
 	Name        Name
 	Arguments   []InputValueDefinition
@@ -144,14 +142,14 @@ type FieldDefinition struct {
 	Directives  []Directive
 }
 
-func (f *FieldDefinition) Pos() token.Pos { return f.Position }
-func (f *FieldDefinition) End() token.Pos { return -1 }
+func (f *FieldDefinition) Pos() int { return f.Position }
+func (f *FieldDefinition) End() int { return -1 }
 
 // InterfaceTypeDefinition
 //
 // https://spec.graphql.org/draft/#InterfaceTypeDefinition
 type InterfaceTypeDefinition struct {
-	Position    token.Pos
+	Position    int
 	Description *StringValue
 	Name        Name
 	Interfaces  []NamedType
@@ -159,8 +157,8 @@ type InterfaceTypeDefinition struct {
 	Fields      []FieldDefinition
 }
 
-func (i *InterfaceTypeDefinition) Pos() token.Pos            { return i.Position }
-func (i *InterfaceTypeDefinition) End() token.Pos            { return -1 }
+func (i *InterfaceTypeDefinition) Pos() int                  { return i.Position }
+func (i *InterfaceTypeDefinition) End() int                  { return -1 }
 func (i *InterfaceTypeDefinition) definitionNode()           {}
 func (i *InterfaceTypeDefinition) typeSystemDefinitionNode() {}
 
@@ -168,15 +166,15 @@ func (i *InterfaceTypeDefinition) typeSystemDefinitionNode() {}
 //
 // https://spec.graphql.org/draft/#UnionTypeDefinition
 type UnionTypeDefinition struct {
-	Position    token.Pos
+	Position    int
 	Description *StringValue
 	Name        Name
 	Directives  []Directive
 	Types       []NamedType
 }
 
-func (u *UnionTypeDefinition) Pos() token.Pos            { return u.Position }
-func (u *UnionTypeDefinition) End() token.Pos            { return -1 }
+func (u *UnionTypeDefinition) Pos() int                  { return u.Position }
+func (u *UnionTypeDefinition) End() int                  { return -1 }
 func (u *UnionTypeDefinition) definitionNode()           {}
 func (u *UnionTypeDefinition) typeSystemDefinitionNode() {}
 
@@ -184,15 +182,15 @@ func (u *UnionTypeDefinition) typeSystemDefinitionNode() {}
 //
 // https://spec.graphql.org/draft/#EnumTypeDefinition
 type EnumTypeDefinition struct {
-	Position    token.Pos
+	Position    int
 	Description *StringValue
 	Name        Name
 	Directives  []Directive
 	Values      []EnumValueDefinition
 }
 
-func (e *EnumTypeDefinition) Pos() token.Pos            { return e.Position }
-func (e *EnumTypeDefinition) End() token.Pos            { return -1 }
+func (e *EnumTypeDefinition) Pos() int                  { return e.Position }
+func (e *EnumTypeDefinition) End() int                  { return -1 }
 func (e *EnumTypeDefinition) definitionNode()           {}
 func (e *EnumTypeDefinition) typeSystemDefinitionNode() {}
 
@@ -200,28 +198,28 @@ func (e *EnumTypeDefinition) typeSystemDefinitionNode() {}
 //
 // https://spec.graphql.org/draft/#EnumValueDefinition
 type EnumValueDefinition struct {
-	Position    token.Pos
+	Position    int
 	Description *StringValue
 	Name        Name
 	Directives  []Directive
 }
 
-func (e *EnumValueDefinition) Pos() token.Pos { return e.Position }
-func (e *EnumValueDefinition) End() token.Pos { return -1 }
+func (e *EnumValueDefinition) Pos() int { return e.Position }
+func (e *EnumValueDefinition) End() int { return -1 }
 
 // InputObjectTypeDefinition
 //
 // https://spec.graphql.org/draft/#InputObjectTypeDefinition
 type InputObjectTypeDefinition struct {
-	Position    token.Pos
+	Position    int
 	Description *StringValue
 	Name        Name
 	Directives  []Directive
 	Fields      []InputValueDefinition
 }
 
-func (i *InputObjectTypeDefinition) Pos() token.Pos            { return i.Position }
-func (i *InputObjectTypeDefinition) End() token.Pos            { return -1 }
+func (i *InputObjectTypeDefinition) Pos() int                  { return i.Position }
+func (i *InputObjectTypeDefinition) End() int                  { return -1 }
 func (i *InputObjectTypeDefinition) definitionNode()           {}
 func (i *InputObjectTypeDefinition) typeSystemDefinitionNode() {}
 
@@ -229,7 +227,7 @@ func (i *InputObjectTypeDefinition) typeSystemDefinitionNode() {}
 //
 // https://spec.graphql.org/draft/#InputValueDefinition
 type InputValueDefinition struct {
-	Position     token.Pos
+	Position     int
 	Description  *StringValue
 	Name         Name
 	Type         Type
@@ -237,22 +235,22 @@ type InputValueDefinition struct {
 	Directives   []Directive
 }
 
-func (i *InputValueDefinition) Pos() token.Pos { return i.Position }
-func (i *InputValueDefinition) End() token.Pos { return -1 }
+func (i *InputValueDefinition) Pos() int { return i.Position }
+func (i *InputValueDefinition) End() int { return -1 }
 
 // DirectiveDefinition
 //
 // https://spec.graphql.org/draft/#DirectiveDefinition
 type DirectiveDefinition struct {
-	Position    token.Pos
+	Position    int
 	Description *StringValue
 	Name        Name
 	Arguments   []InputValueDefinition
 	Locations   []Name
 }
 
-func (d *DirectiveDefinition) Pos() token.Pos            { return d.Position }
-func (d *DirectiveDefinition) End() token.Pos            { return -1 }
+func (d *DirectiveDefinition) Pos() int                  { return d.Position }
+func (d *DirectiveDefinition) End() int                  { return -1 }
 func (d *DirectiveDefinition) definitionNode()           {}
 func (d *DirectiveDefinition) typeSystemDefinitionNode() {}
 
@@ -268,13 +266,13 @@ type TypeSystemExtension interface {
 //
 // https://spec.graphql.org/draft/#SchemaExtension
 type SchemaExtension struct {
-	Position          token.Pos
+	Position          int
 	Directives        []Directive
 	RootOperationDefs []RootOperationTypeDefinition
 }
 
-func (s *SchemaExtension) Pos() token.Pos           { return s.Position }
-func (s *SchemaExtension) End() token.Pos           { return -1 }
+func (s *SchemaExtension) Pos() int                 { return s.Position }
+func (s *SchemaExtension) End() int                 { return -1 }
 func (s *SchemaExtension) definitionNode()          {}
 func (s *SchemaExtension) typeSystemExtensionNode() {}
 
@@ -282,14 +280,14 @@ func (s *SchemaExtension) typeSystemExtensionNode() {}
 //
 // https://spec.graphql.org/draft/#ScalarTypeDefinition
 type ScalarTypeDefinition struct {
-	Position    token.Pos
+	Position    int
 	Description *StringValue
 	Name        Name
 	Directives  []Directive
 }
 
-func (s *ScalarTypeDefinition) Pos() token.Pos            { return s.Position }
-func (s *ScalarTypeDefinition) End() token.Pos            { return -1 }
+func (s *ScalarTypeDefinition) Pos() int                  { return s.Position }
+func (s *ScalarTypeDefinition) End() int                  { return -1 }
 func (s *ScalarTypeDefinition) definitionNode()           {}
 func (s *ScalarTypeDefinition) typeSystemDefinitionNode() {}
 
@@ -297,7 +295,7 @@ func (s *ScalarTypeDefinition) typeSystemDefinitionNode() {}
 //
 // https://spec.graphql.org/draft/#ObjectTypeDefinition
 type ObjectTypeDefinition struct {
-	Position    token.Pos
+	Position    int
 	Description *StringValue
 	Name        Name
 	Interfaces  []NamedType
@@ -305,8 +303,8 @@ type ObjectTypeDefinition struct {
 	Fields      []FieldDefinition
 }
 
-func (o *ObjectTypeDefinition) Pos() token.Pos            { return o.Position }
-func (o *ObjectTypeDefinition) End() token.Pos            { return -1 }
+func (o *ObjectTypeDefinition) Pos() int                  { return o.Position }
+func (o *ObjectTypeDefinition) End() int                  { return -1 }
 func (o *ObjectTypeDefinition) definitionNode()           {}
 func (o *ObjectTypeDefinition) typeSystemDefinitionNode() {}
 
@@ -314,12 +312,12 @@ func (o *ObjectTypeDefinition) typeSystemDefinitionNode() {}
 //
 // https://spec.graphql.org/draft/#SelectionSet
 type SelectionSet struct {
-	Position   token.Pos
+	Position   int
 	Selections []Selection
 }
 
-func (s *SelectionSet) Pos() token.Pos { return s.Position }
-func (s *SelectionSet) End() token.Pos { return -1 }
+func (s *SelectionSet) Pos() int { return s.Position }
+func (s *SelectionSet) End() int { return -1 }
 
 // Selection can be Field, FragmentSpread, InlineFragment
 //
@@ -333,7 +331,7 @@ type Selection interface {
 //
 // https://spec.graphql.org/draft/#Field
 type Field struct {
-	Position     token.Pos
+	Position     int
 	Alias        *Name
 	Name         Name
 	Arguments    Arguments
@@ -341,42 +339,42 @@ type Field struct {
 	SelectionSet *SelectionSet
 }
 
-func (f *Field) Pos() token.Pos { return f.Position }
-func (f *Field) End() token.Pos { return -1 }
+func (f *Field) Pos() int       { return f.Position }
+func (f *Field) End() int       { return -1 }
 func (f *Field) selectionNode() {}
 
 // FragmentSpread
 //
 // https://spec.graphql.org/draft/#FragmentSpread
 type FragmentSpread struct {
-	Position   token.Pos
+	Position   int
 	Name       Name
 	Directives Directives
 }
 
-func (fs *FragmentSpread) Pos() token.Pos { return fs.Position }
-func (fs *FragmentSpread) End() token.Pos { return -1 }
+func (fs *FragmentSpread) Pos() int       { return fs.Position }
+func (fs *FragmentSpread) End() int       { return -1 }
 func (fs *FragmentSpread) selectionNode() {}
 
 // InlineFragment
 //
 // https://spec.graphql.org/draft/#InlineFragment
 type InlineFragment struct {
-	Position      token.Pos
+	Position      int
 	TypeCondition *NamedType
 	Directives    Directives
 	SelectionSet  SelectionSet
 }
 
-func (inf *InlineFragment) Pos() token.Pos { return inf.Position }
-func (inf *InlineFragment) End() token.Pos { return -1 }
+func (inf *InlineFragment) Pos() int       { return inf.Position }
+func (inf *InlineFragment) End() int       { return -1 }
 func (inf *InlineFragment) selectionNode() {}
 
 // Directive
 //
 // https://spec.graphql.org/draft/#Directive
 type Directive struct {
-	Position  token.Pos
+	Position  int
 	Name      Name
 	Arguments Arguments
 }
@@ -386,8 +384,8 @@ type Directive struct {
 // https://spec.graphql.org/draft/#Directives
 type Directives = []Directive
 
-func (d *Directive) Pos() token.Pos { return d.Position }
-func (d *Directive) End() token.Pos { return -1 }
+func (d *Directive) Pos() int { return d.Position }
+func (d *Directive) End() int { return -1 }
 
 // Arguments
 //
@@ -398,13 +396,13 @@ type Arguments = []Argument
 //
 // https://spec.graphql.org/draft/#Argument
 type Argument struct {
-	Position token.Pos
+	Position int
 	Name     Name
 	Value    Value
 }
 
-func (a *Argument) Pos() token.Pos { return a.Position }
-func (a *Argument) End() token.Pos { return -1 }
+func (a *Argument) Pos() int { return a.Position }
+func (a *Argument) End() int { return -1 }
 
 // Value can be IntValue, FloatValue, StringValue, BooleanValue,
 // NullValue, EnumValue, ListValue, ObjectValue, Variable.
@@ -419,121 +417,121 @@ type Value interface {
 //
 // https://spec.graphql.org/draft/#IntValue
 type IntValue struct {
-	Position token.Pos
+	Position int
 	Value    string
 }
 
-func (v *IntValue) Pos() token.Pos { return v.Position }
-func (v *IntValue) End() token.Pos { return -1 }
-func (v *IntValue) valueNode()     {}
+func (v *IntValue) Pos() int   { return v.Position }
+func (v *IntValue) End() int   { return -1 }
+func (v *IntValue) valueNode() {}
 
 // FloatValue
 //
 // https://spec.graphql.org/draft/#FloatValue
 type FloatValue struct {
-	Position token.Pos
+	Position int
 	Value    string
 }
 
-func (v *FloatValue) Pos() token.Pos { return v.Position }
-func (v *FloatValue) End() token.Pos { return -1 }
-func (v *FloatValue) valueNode()     {}
+func (v *FloatValue) Pos() int   { return v.Position }
+func (v *FloatValue) End() int   { return -1 }
+func (v *FloatValue) valueNode() {}
 
 // StringValue
 //
 // https://spec.graphql.org/draft/#StringValue
 type StringValue struct {
-	Position token.Pos
+	Position int
 	Value    string
 	Block    bool
 }
 
-func (v *StringValue) Pos() token.Pos { return v.Position }
-func (v *StringValue) End() token.Pos { return -1 }
-func (v *StringValue) valueNode()     {}
+func (v *StringValue) Pos() int   { return v.Position }
+func (v *StringValue) End() int   { return -1 }
+func (v *StringValue) valueNode() {}
 
 // BooleanValue
 //
 // https://spec.graphql.org/draft/#BooleanValue
 type BooleanValue struct {
-	Position token.Pos
+	Position int
 	Value    bool
 }
 
-func (v *BooleanValue) Pos() token.Pos { return v.Position }
-func (v *BooleanValue) End() token.Pos { return -1 }
-func (v *BooleanValue) valueNode()     {}
+func (v *BooleanValue) Pos() int   { return v.Position }
+func (v *BooleanValue) End() int   { return -1 }
+func (v *BooleanValue) valueNode() {}
 
 // NullValue
 //
 // https://spec.graphql.org/draft/#NullValue
 type NullValue struct {
-	Position token.Pos
+	Position int
 }
 
-func (v *NullValue) Pos() token.Pos { return v.Position }
-func (v *NullValue) End() token.Pos { return -1 }
-func (v *NullValue) valueNode()     {}
+func (v *NullValue) Pos() int   { return v.Position }
+func (v *NullValue) End() int   { return -1 }
+func (v *NullValue) valueNode() {}
 
 // EnumValue
 //
 // https://spec.graphql.org/draft/#EnumValue
 type EnumValue struct {
-	Position token.Pos
+	Position int
 	Value    string
 }
 
-func (v *EnumValue) Pos() token.Pos { return v.Position }
-func (v *EnumValue) End() token.Pos { return -1 }
-func (v *EnumValue) valueNode()     {}
+func (v *EnumValue) Pos() int   { return v.Position }
+func (v *EnumValue) End() int   { return -1 }
+func (v *EnumValue) valueNode() {}
 
 // ListValue
 //
 // https://spec.graphql.org/draft/#ListValue
 type ListValue struct {
-	Position token.Pos
+	Position int
 	Values   []Value
 }
 
-func (v *ListValue) Pos() token.Pos { return v.Position }
-func (v *ListValue) End() token.Pos { return -1 }
-func (v *ListValue) valueNode()     {}
+func (v *ListValue) Pos() int   { return v.Position }
+func (v *ListValue) End() int   { return -1 }
+func (v *ListValue) valueNode() {}
 
 // ObjectValue
 //
 // https://spec.graphql.org/draft/#ObjectValue
 type ObjectValue struct {
-	Position token.Pos
+	Position int
 	Fields   []ObjectField
 }
 
-func (v *ObjectValue) Pos() token.Pos { return v.Position }
-func (v *ObjectValue) End() token.Pos { return -1 }
-func (v *ObjectValue) valueNode()     {}
+func (v *ObjectValue) Pos() int   { return v.Position }
+func (v *ObjectValue) End() int   { return -1 }
+func (v *ObjectValue) valueNode() {}
 
 // ObjectField
 //
 // https://spec.graphql.org/draft/#ObjectField
 type ObjectField struct {
-	Position token.Pos
+	Position int
 	Name     Name
 	Value    Value
 }
 
-func (o *ObjectField) Pos() token.Pos { return o.Position }
-func (o *ObjectField) End() token.Pos { return -1 }
+func (o *ObjectField) Pos() int { return o.Position }
+func (o *ObjectField) End() int { return -1 }
 
 // Variable
 //
 // https://spec.graphql.org/draft/#Variable
 type Variable struct {
-	Position token.Pos
+	Position int
 	Name     Name
 }
 
-func (v *Variable) Pos() token.Pos { return v.Position }
-func (v *Variable) End() token.Pos { return -1 }
-func (v *Variable) valueNode()     {}
+func (v *Variable) Pos() int   { return v.Position }
+func (v *Variable) End() int   { return -1 }
+func (v *Variable) valueNode() {}
 
 // VariablesDefinition
 //
@@ -544,15 +542,15 @@ type VariablesDefinition = []VariableDefinition
 //
 // https://spec.graphql.org/draft/#VariableDefinition
 type VariableDefinition struct {
-	Position     token.Pos
+	Position     int
 	Variable     Variable
 	Type         Type
 	DefaultValue Value
 	Directives   Directives
 }
 
-func (vd *VariableDefinition) Pos() token.Pos { return vd.Position }
-func (vd *VariableDefinition) End() token.Pos { return -1 }
+func (vd *VariableDefinition) Pos() int { return vd.Position }
+func (vd *VariableDefinition) End() int { return -1 }
 
 // Type can be NamedType, ListType, NonNullType.
 //
@@ -566,45 +564,45 @@ type Type interface {
 //
 // https://spec.graphql.org/draft/#NamedType
 type NamedType struct {
-	Position token.Pos
+	Position int
 	Name     Name
 }
 
-func (n *NamedType) Pos() token.Pos { return n.Position }
-func (n *NamedType) End() token.Pos { return -1 }
-func (n *NamedType) typeNode()      {}
+func (n *NamedType) Pos() int  { return n.Position }
+func (n *NamedType) End() int  { return -1 }
+func (n *NamedType) typeNode() {}
 
 // ListType
 //
 // https://spec.graphql.org/draft/#ListType
 type ListType struct {
-	Position token.Pos
+	Position int
 	Type     Type
 }
 
-func (l *ListType) Pos() token.Pos { return l.Position }
-func (l *ListType) End() token.Pos { return -1 }
-func (l *ListType) typeNode()      {}
+func (l *ListType) Pos() int  { return l.Position }
+func (l *ListType) End() int  { return -1 }
+func (l *ListType) typeNode() {}
 
 // NonNullType
 //
 // https://spec.graphql.org/draft/#NonNullType
 type NonNullType struct {
-	Position token.Pos
+	Position int
 	Type     Type
 }
 
-func (n *NonNullType) Pos() token.Pos { return n.Position }
-func (n *NonNullType) End() token.Pos { return -1 }
-func (n *NonNullType) typeNode()      {}
+func (n *NonNullType) Pos() int  { return n.Position }
+func (n *NonNullType) End() int  { return -1 }
+func (n *NonNullType) typeNode() {}
 
 // Name
 //
 // https://spec.graphql.org/draft/#Name
 type Name struct {
-	Position token.Pos
+	Position int
 	Value    string
 }
 
-func (n *Name) Pos() token.Pos { return n.Position }
-func (n *Name) End() token.Pos { return -1 }
+func (n *Name) Pos() int { return n.Position }
+func (n *Name) End() int { return -1 }
