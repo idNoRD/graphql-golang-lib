@@ -46,6 +46,7 @@ type OperationDefinition struct {
 }
 
 func (o *OperationDefinition) Pos() token.Pos  { return o.Position }
+func (o *OperationDefinition) End() token.Pos  { return -1 }
 func (o *OperationDefinition) definitionNode() {}
 
 // FragmentDefinition
@@ -60,6 +61,7 @@ type FragmentDefinition struct {
 }
 
 func (f *FragmentDefinition) Pos() token.Pos  { return f.Position }
+func (f *FragmentDefinition) End() token.Pos  { return -1 }
 func (f *FragmentDefinition) definitionNode() {}
 
 // TypeDefinition covers schema, scalar, object, interface, union, enum, input.
@@ -81,6 +83,7 @@ type SchemaDefinition struct {
 }
 
 func (s *SchemaDefinition) Pos() token.Pos            { return s.Position }
+func (s *SchemaDefinition) End() token.Pos            { return -1 }
 func (s *SchemaDefinition) definitionNode()           {}
 func (s *SchemaDefinition) typeSystemDefinitionNode() {}
 
@@ -94,6 +97,7 @@ type RootOperationTypeDefinition struct {
 }
 
 func (r *RootOperationTypeDefinition) Pos() token.Pos { return r.Position }
+func (r *RootOperationTypeDefinition) End() token.Pos { return -1 }
 
 // ScalarTypeExtension
 //
@@ -105,6 +109,7 @@ type ScalarTypeExtension struct {
 }
 
 func (s *ScalarTypeExtension) Pos() token.Pos           { return s.Position }
+func (s *ScalarTypeExtension) End() token.Pos           { return -1 }
 func (s *ScalarTypeExtension) definitionNode()          {}
 func (s *ScalarTypeExtension) typeSystemExtensionNode() {}
 
@@ -120,6 +125,7 @@ type ObjectTypeExtension struct {
 }
 
 func (o *ObjectTypeExtension) Pos() token.Pos           { return o.Position }
+func (o *ObjectTypeExtension) End() token.Pos           { return -1 }
 func (o *ObjectTypeExtension) definitionNode()          {}
 func (o *ObjectTypeExtension) typeSystemExtensionNode() {}
 
@@ -138,6 +144,7 @@ type FieldDefinition struct {
 }
 
 func (f *FieldDefinition) Pos() token.Pos { return f.Position }
+func (f *FieldDefinition) End() token.Pos { return -1 }
 
 // InterfaceTypeDefinition
 //
@@ -152,6 +159,7 @@ type InterfaceTypeDefinition struct {
 }
 
 func (i *InterfaceTypeDefinition) Pos() token.Pos            { return i.Position }
+func (i *InterfaceTypeDefinition) End() token.Pos            { return -1 }
 func (i *InterfaceTypeDefinition) definitionNode()           {}
 func (i *InterfaceTypeDefinition) typeSystemDefinitionNode() {}
 
@@ -167,6 +175,7 @@ type UnionTypeDefinition struct {
 }
 
 func (u *UnionTypeDefinition) Pos() token.Pos            { return u.Position }
+func (u *UnionTypeDefinition) End() token.Pos            { return -1 }
 func (u *UnionTypeDefinition) definitionNode()           {}
 func (u *UnionTypeDefinition) typeSystemDefinitionNode() {}
 
@@ -182,6 +191,7 @@ type EnumTypeDefinition struct {
 }
 
 func (e *EnumTypeDefinition) Pos() token.Pos            { return e.Position }
+func (e *EnumTypeDefinition) End() token.Pos            { return -1 }
 func (e *EnumTypeDefinition) definitionNode()           {}
 func (e *EnumTypeDefinition) typeSystemDefinitionNode() {}
 
@@ -196,6 +206,7 @@ type EnumValueDefinition struct {
 }
 
 func (e *EnumValueDefinition) Pos() token.Pos { return e.Position }
+func (e *EnumValueDefinition) End() token.Pos { return -1 }
 
 // InputObjectTypeDefinition
 //
@@ -209,6 +220,7 @@ type InputObjectTypeDefinition struct {
 }
 
 func (i *InputObjectTypeDefinition) Pos() token.Pos            { return i.Position }
+func (i *InputObjectTypeDefinition) End() token.Pos            { return -1 }
 func (i *InputObjectTypeDefinition) definitionNode()           {}
 func (i *InputObjectTypeDefinition) typeSystemDefinitionNode() {}
 
@@ -225,6 +237,7 @@ type InputValueDefinition struct {
 }
 
 func (i *InputValueDefinition) Pos() token.Pos { return i.Position }
+func (i *InputValueDefinition) End() token.Pos { return -1 }
 
 // DirectiveDefinition
 //
@@ -238,6 +251,7 @@ type DirectiveDefinition struct {
 }
 
 func (d *DirectiveDefinition) Pos() token.Pos            { return d.Position }
+func (d *DirectiveDefinition) End() token.Pos            { return -1 }
 func (d *DirectiveDefinition) definitionNode()           {}
 func (d *DirectiveDefinition) typeSystemDefinitionNode() {}
 
@@ -259,6 +273,7 @@ type SchemaExtension struct {
 }
 
 func (s *SchemaExtension) Pos() token.Pos           { return s.Position }
+func (s *SchemaExtension) End() token.Pos           { return -1 }
 func (s *SchemaExtension) definitionNode()          {}
 func (s *SchemaExtension) typeSystemExtensionNode() {}
 
@@ -273,6 +288,7 @@ type ScalarTypeDefinition struct {
 }
 
 func (s *ScalarTypeDefinition) Pos() token.Pos            { return s.Position }
+func (s *ScalarTypeDefinition) End() token.Pos            { return -1 }
 func (s *ScalarTypeDefinition) definitionNode()           {}
 func (s *ScalarTypeDefinition) typeSystemDefinitionNode() {}
 
@@ -289,6 +305,7 @@ type ObjectTypeDefinition struct {
 }
 
 func (o *ObjectTypeDefinition) Pos() token.Pos            { return o.Position }
+func (o *ObjectTypeDefinition) End() token.Pos            { return -1 }
 func (o *ObjectTypeDefinition) definitionNode()           {}
 func (o *ObjectTypeDefinition) typeSystemDefinitionNode() {}
 
@@ -301,6 +318,7 @@ type SelectionSet struct {
 }
 
 func (s *SelectionSet) Pos() token.Pos { return s.Position }
+func (s *SelectionSet) End() token.Pos { return -1 }
 
 // Selection can be Field, FragmentSpread, InlineFragment
 //
@@ -323,6 +341,7 @@ type Field struct {
 }
 
 func (f *Field) Pos() token.Pos { return f.Position }
+func (f *Field) End() token.Pos { return -1 }
 func (f *Field) selectionNode() {}
 
 // FragmentSpread
@@ -335,6 +354,7 @@ type FragmentSpread struct {
 }
 
 func (fs *FragmentSpread) Pos() token.Pos { return fs.Position }
+func (fs *FragmentSpread) End() token.Pos { return -1 }
 func (fs *FragmentSpread) selectionNode() {}
 
 // InlineFragment
@@ -348,6 +368,7 @@ type InlineFragment struct {
 }
 
 func (inf *InlineFragment) Pos() token.Pos { return inf.Position }
+func (inf *InlineFragment) End() token.Pos { return -1 }
 func (inf *InlineFragment) selectionNode() {}
 
 // Directive
@@ -365,6 +386,7 @@ type Directive struct {
 type Directives = []Directive
 
 func (d *Directive) Pos() token.Pos { return d.Position }
+func (d *Directive) End() token.Pos { return -1 }
 
 // Arguments
 //
@@ -381,6 +403,7 @@ type Argument struct {
 }
 
 func (a *Argument) Pos() token.Pos { return a.Position }
+func (a *Argument) End() token.Pos { return -1 }
 
 // Value can be IntValue, FloatValue, StringValue, BooleanValue,
 // NullValue, EnumValue, ListValue, ObjectValue, Variable.
@@ -400,6 +423,7 @@ type IntValue struct {
 }
 
 func (v *IntValue) Pos() token.Pos { return v.Position }
+func (v *IntValue) End() token.Pos { return -1 }
 func (v *IntValue) valueNode()     {}
 
 // FloatValue
@@ -411,6 +435,7 @@ type FloatValue struct {
 }
 
 func (v *FloatValue) Pos() token.Pos { return v.Position }
+func (v *FloatValue) End() token.Pos { return -1 }
 func (v *FloatValue) valueNode()     {}
 
 // StringValue
@@ -423,6 +448,7 @@ type StringValue struct {
 }
 
 func (v *StringValue) Pos() token.Pos { return v.Position }
+func (v *StringValue) End() token.Pos { return -1 }
 func (v *StringValue) valueNode()     {}
 
 // BooleanValue
@@ -434,6 +460,7 @@ type BooleanValue struct {
 }
 
 func (v *BooleanValue) Pos() token.Pos { return v.Position }
+func (v *BooleanValue) End() token.Pos { return -1 }
 func (v *BooleanValue) valueNode()     {}
 
 // NullValue
@@ -444,6 +471,7 @@ type NullValue struct {
 }
 
 func (v *NullValue) Pos() token.Pos { return v.Position }
+func (v *NullValue) End() token.Pos { return -1 }
 func (v *NullValue) valueNode()     {}
 
 // EnumValue
@@ -455,6 +483,7 @@ type EnumValue struct {
 }
 
 func (v *EnumValue) Pos() token.Pos { return v.Position }
+func (v *EnumValue) End() token.Pos { return -1 }
 func (v *EnumValue) valueNode()     {}
 
 // ListValue
@@ -466,6 +495,7 @@ type ListValue struct {
 }
 
 func (v *ListValue) Pos() token.Pos { return v.Position }
+func (v *ListValue) End() token.Pos { return -1 }
 func (v *ListValue) valueNode()     {}
 
 // ObjectValue
@@ -477,6 +507,7 @@ type ObjectValue struct {
 }
 
 func (v *ObjectValue) Pos() token.Pos { return v.Position }
+func (v *ObjectValue) End() token.Pos { return -1 }
 func (v *ObjectValue) valueNode()     {}
 
 // ObjectField
@@ -489,6 +520,7 @@ type ObjectField struct {
 }
 
 func (o *ObjectField) Pos() token.Pos { return o.Position }
+func (o *ObjectField) End() token.Pos { return -1 }
 
 // Variable
 //
@@ -499,6 +531,7 @@ type Variable struct {
 }
 
 func (v *Variable) Pos() token.Pos { return v.Position }
+func (v *Variable) End() token.Pos { return -1 }
 func (v *Variable) valueNode()     {}
 
 // VariablesDefinition
@@ -518,6 +551,7 @@ type VariableDefinition struct {
 }
 
 func (vd *VariableDefinition) Pos() token.Pos { return vd.Position }
+func (vd *VariableDefinition) End() token.Pos { return -1 }
 
 // Type can be NamedType, ListType, NonNullType.
 //
@@ -536,6 +570,7 @@ type NamedType struct {
 }
 
 func (n *NamedType) Pos() token.Pos { return n.Position }
+func (n *NamedType) End() token.Pos { return -1 }
 func (n *NamedType) typeNode()      {}
 
 // ListType
@@ -547,6 +582,7 @@ type ListType struct {
 }
 
 func (l *ListType) Pos() token.Pos { return l.Position }
+func (l *ListType) End() token.Pos { return -1 }
 func (l *ListType) typeNode()      {}
 
 // NonNullType
@@ -558,6 +594,7 @@ type NonNullType struct {
 }
 
 func (n *NonNullType) Pos() token.Pos { return n.Position }
+func (n *NonNullType) End() token.Pos { return -1 }
 func (n *NonNullType) typeNode()      {}
 
 // Name
@@ -569,3 +606,4 @@ type Name struct {
 }
 
 func (n *Name) Pos() token.Pos { return n.Position }
+func (n *Name) End() token.Pos { return -1 }
