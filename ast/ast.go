@@ -15,6 +15,7 @@ type Document struct {
 }
 
 func (d *Document) Pos() token.Pos { return d.Position }
+func (d *Document) End() token.Pos { return -1 }
 
 // Definition can be Executable, TypeSystem, or Extension.
 type Definition interface {
