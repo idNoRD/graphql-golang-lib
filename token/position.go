@@ -9,6 +9,8 @@ type Position struct {
 	Column int
 }
 
+type Pos int
+
 func (p *Position) String() string {
 	return strconv.Itoa(p.Line) + ":" + strconv.Itoa(p.Column) + " (" + strconv.Itoa(p.Start) + "-" + strconv.Itoa(p.End) + ")"
 }
