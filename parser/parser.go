@@ -478,7 +478,7 @@ func (p *Parser) parseDirectives() ([]*ast.Directive, error) {
 	for p.curToken.Type == token.AT {
 		directive, err := p.parseDirective()
 		if err != nil {
-			return directives, err
+			return nil, err
 		}
 		directives = append(directives, directive)
 	}
