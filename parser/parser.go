@@ -31,14 +31,14 @@ func (p *Parser) ParseDocument() (*ast.Document, error) {
 	for p.curToken.Type != token.EOF {
 		def, err := p.parseDefinition()
 		if err != nil {
-			return doc, err
+			return nil, err
 		}
 		if def != nil {
 			doc.Definitions = append(doc.Definitions, def)
 		}
 
 		if err = p.next(); err != nil {
-			return doc, err
+			return nil, err
 		}
 	}
 
@@ -557,19 +557,19 @@ func (p *Parser) parseArgument() (*ast.Argument, error) {
 	}
 
 	if err := p.next(); err != nil {
-		return arg, err
+		return nil, err
 	}
 
 	if err := p.expect(token.COLON); err != nil {
 		return nil, err
 	}
 	if err := p.next(); err != nil {
-		return arg, err
+		return nil, err
 	}
 
 	value, err := p.parseValue()
 	if err != nil {
-		return arg, err
+		return nil, err
 	}
 	arg.Value = value
 
@@ -584,7 +584,7 @@ func (p *Parser) parseValue() (ast.Value, error) {
 			Value:    p.curToken.Literal,
 		}
 		if err := p.next(); err != nil {
-			return val, err
+			return nil, err
 		}
 		return val, nil
 	case token.FLOAT:
@@ -593,7 +593,7 @@ func (p *Parser) parseValue() (ast.Value, error) {
 			Value:    p.curToken.Literal,
 		}
 		if err := p.next(); err != nil {
-			return val, err
+			return nil, err
 		}
 		return val, nil
 	case token.STRING_VALUE:
@@ -603,7 +603,7 @@ func (p *Parser) parseValue() (ast.Value, error) {
 			Block:    false,
 		}
 		if err := p.next(); err != nil {
-			return val, err
+			return nil, err
 		}
 		return val, nil
 	//case token.STRING_VALUE:
@@ -620,7 +620,7 @@ func (p *Parser) parseValue() (ast.Value, error) {
 				Value:    true,
 			}
 			if err := p.next(); err != nil {
-				return val, err
+				return nil, err
 			}
 			return val, nil
 		case "false":
@@ -629,7 +629,7 @@ func (p *Parser) parseValue() (ast.Value, error) {
 				Value:    false,
 			}
 			if err := p.next(); err != nil {
-				return val, err
+				return nil, err
 			}
 			return val, nil
 		case "null":
@@ -637,7 +637,7 @@ func (p *Parser) parseValue() (ast.Value, error) {
 				Position: p.curToken.Start,
 			}
 			if err := p.next(); err != nil {
-				return val, err
+				return nil, err
 			}
 			return val, nil
 		default:
@@ -646,7 +646,7 @@ func (p *Parser) parseValue() (ast.Value, error) {
 				Value:    p.curToken.Literal,
 			}
 			if err := p.next(); err != nil {
-				return val, err
+				return nil, err
 			}
 			return val, nil
 		}
@@ -709,7 +709,7 @@ func (p *Parser) parseObjectValue() (ast.Value, error) {
 	for p.curToken.Type != token.RBRACE && p.curToken.Type != token.EOF {
 		field, err := p.parseObjectField()
 		if err != nil {
-			return obj, err
+			return nil, err
 		}
 		obj.Fields = append(obj.Fields, field)
 	}
