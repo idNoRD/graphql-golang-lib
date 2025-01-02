@@ -434,13 +434,11 @@ func (p *Parser) parseInlineFragment() (*ast.InlineFragment, error) {
 		return nil, err
 	}
 
-	if err := p.expect(token.NAME); err != nil {
+	nt, err := p.parseNamedType()
+	if err != nil {
 		return nil, err
 	}
-	inf.TypeCondition = p.parseNamedType()
-	if err := p.next(); err != nil {
-		return nil, err
-	}
+	inf.TypeCondition = nt
 
 	directives, err := p.parseDirectives()
 	if err != nil {
@@ -457,14 +455,21 @@ func (p *Parser) parseInlineFragment() (*ast.InlineFragment, error) {
 	return inf, nil
 }
 
-func (p *Parser) parseNamedType() *ast.NamedType {
-	return &ast.NamedType{
+func (p *Parser) parseNamedType() (nt *ast.NamedType, err error) {
+	if err := p.expect(token.NAME); err != nil {
+		return nil, err
+	}
+	nt = &ast.NamedType{
 		Position: p.curToken.Start,
 		Name: &ast.Name{
 			Position: p.curToken.Start,
 			Value:    p.curToken.Literal,
 		},
 	}
+	if err := p.next(); err != nil {
+		return nil, err
+	}
+	return nt, nil
 }
 
 func (p *Parser) parseDirectives() ([]*ast.Directive, error) {
