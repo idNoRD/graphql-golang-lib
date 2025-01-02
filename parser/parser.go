@@ -507,13 +507,13 @@ func (p *Parser) parseDirective() (*ast.Directive, error) {
 		},
 	}
 	if err := p.next(); err != nil {
-		return dir, err
+		return nil, err
 	}
 
 	if p.curToken.Type == token.LPAREN {
 		args, err := p.parseArguments()
 		if err != nil {
-			return dir, err
+			return nil, err
 		}
 		dir.Arguments = args
 	}
