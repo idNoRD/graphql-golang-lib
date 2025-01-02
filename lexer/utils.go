@@ -131,3 +131,14 @@ func hexDigitToInt(ch rune) int {
 	}
 	return -1
 }
+
+var escapeChars = map[rune]byte{
+	'"':  '"',
+	'\\': '\\',
+	'/':  '/',
+	'b':  '\b',
+	'f':  '\f',
+	'n':  '\n',
+	'r':  '\r',
+	't':  '\t',
+}

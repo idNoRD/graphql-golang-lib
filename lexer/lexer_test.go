@@ -14,19 +14,19 @@ func TestNextToken_Punctuator(t *testing.T) {
 		input         string
 		expectedToken token.Token
 	}{
-		{"Bang", "!", token.Token{Type: token.BANG, Position: token.Position{Start: 0, End: 1, Line: 1, Column: 1}}},
-		{"Dollar", "$", token.Token{Type: token.DOLLAR, Position: token.Position{Start: 0, End: 1, Line: 1, Column: 1}}},
-		{"Ampersand", "&", token.Token{Type: token.AMP, Position: token.Position{Start: 0, End: 1, Line: 1, Column: 1}}},
-		{"Left Parenthesis", "(", token.Token{Type: token.LPAREN, Position: token.Position{Start: 0, End: 1, Line: 1, Column: 1}}},
-		{"Right Parenthesis", ")", token.Token{Type: token.RPAREN, Position: token.Position{Start: 0, End: 1, Line: 1, Column: 1}}},
-		{"Colon", ":", token.Token{Type: token.COLON, Position: token.Position{Start: 0, End: 1, Line: 1, Column: 1}}},
-		{"Equals", "=", token.Token{Type: token.EQUALS, Position: token.Position{Start: 0, End: 1, Line: 1, Column: 1}}},
-		{"At", "@", token.Token{Type: token.AT, Position: token.Position{Start: 0, End: 1, Line: 1, Column: 1}}},
-		{"Left Bracket", "[", token.Token{Type: token.LBRACK, Position: token.Position{Start: 0, End: 1, Line: 1, Column: 1}}},
-		{"Right Bracket", "]", token.Token{Type: token.RBRACK, Position: token.Position{Start: 0, End: 1, Line: 1, Column: 1}}},
-		{"Left Brace", "{", token.Token{Type: token.LBRACE, Position: token.Position{Start: 0, End: 1, Line: 1, Column: 1}}},
-		{"Pipe", "|", token.Token{Type: token.PIPE, Position: token.Position{Start: 0, End: 1, Line: 1, Column: 1}}},
-		{"Right Brace", "}", token.Token{Type: token.RBRACE, Position: token.Position{Start: 0, End: 1, Line: 1, Column: 1}}},
+		{"Bang", "!", token.Token{Type: token.BANG, Start: 0, End: 1}},
+		{"Dollar", "$", token.Token{Type: token.DOLLAR, Start: 0, End: 1}},
+		{"Ampersand", "&", token.Token{Type: token.AMP, Start: 0, End: 1}},
+		{"Left Parenthesis", "(", token.Token{Type: token.LPAREN, Start: 0, End: 1}},
+		{"Right Parenthesis", ")", token.Token{Type: token.RPAREN, Start: 0, End: 1}},
+		{"Colon", ":", token.Token{Type: token.COLON, Start: 0, End: 1}},
+		{"Equals", "=", token.Token{Type: token.EQUALS, Start: 0, End: 1}},
+		{"At", "@", token.Token{Type: token.AT, Start: 0, End: 1}},
+		{"Left Bracket", "[", token.Token{Type: token.LBRACK, Start: 0, End: 1}},
+		{"Right Bracket", "]", token.Token{Type: token.RBRACK, Start: 0, End: 1}},
+		{"Left Brace", "{", token.Token{Type: token.LBRACE, Start: 0, End: 1}},
+		{"Pipe", "|", token.Token{Type: token.PIPE, Start: 0, End: 1}},
+		{"Right Brace", "}", token.Token{Type: token.RBRACE, Start: 0, End: 1}},
 	})
 }
 
@@ -36,12 +36,12 @@ func TestNextToken_LineTerminators(t *testing.T) {
 		input         string
 		expectedToken token.Token
 	}{
-		{"Skip newline", "\nhello", token.Token{Type: token.NAME, Literal: "hello", Position: token.Position{Start: 1, End: 6, Line: 2, Column: 1}}},
-		{"Skip carriage return", "\rhello", token.Token{Type: token.NAME, Literal: "hello", Position: token.Position{Start: 1, End: 6, Line: 2, Column: 1}}},
-		{"Skip carriage return and newline", "\r\nhello", token.Token{Type: token.NAME, Literal: "hello", Position: token.Position{Start: 2, End: 7, Line: 2, Column: 1}}},
-		{"Skip newline and carriage return", "\n\rhello", token.Token{Type: token.NAME, Literal: "hello", Position: token.Position{Start: 2, End: 7, Line: 3, Column: 1}}},
-		{"Skip CR, CRLF, and LF", "\r\r\n\nhello", token.Token{Type: token.NAME, Literal: "hello", Position: token.Position{Start: 4, End: 9, Line: 4, Column: 1}}},
-		{"Skip LF, LFCR, and CR", "\n\n\r\rhello", token.Token{Type: token.NAME, Literal: `hello`, Position: token.Position{Start: 4, End: 9, Line: 5, Column: 1}}},
+		{"Skip newline", "\nhello", token.Token{Type: token.NAME, Literal: "hello", Start: 1, End: 6}},
+		{"Skip carriage return", "\rhello", token.Token{Type: token.NAME, Literal: "hello", Start: 1, End: 6}},
+		{"Skip carriage return and newline", "\r\nhello", token.Token{Type: token.NAME, Literal: "hello", Start: 2, End: 7}},
+		{"Skip newline and carriage return", "\n\rhello", token.Token{Type: token.NAME, Literal: "hello", Start: 2, End: 7}},
+		{"Skip CR, CRLF, and LF", "\r\r\n\nhello", token.Token{Type: token.NAME, Literal: "hello", Start: 4, End: 9}},
+		{"Skip LF, LFCR, and CR", "\n\n\r\rhello", token.Token{Type: token.NAME, Literal: `hello`, Start: 4, End: 9}},
 	})
 }
 
@@ -51,7 +51,7 @@ func TestNextToken_LinesAndColumns(t *testing.T) {
 		input         string
 		expectedToken token.Token
 	}{
-		{"Track lines and columns with mixed line breaks and spaces", "\r \r\n \n   hello", token.Token{Type: token.NAME, Literal: "hello", Position: token.Position{Start: 9, End: 14, Line: 4, Column: 4}}},
+		{"Track lines and columns with mixed line breaks and spaces", "\r \r\n \n   hello", token.Token{Type: token.NAME, Literal: "hello", Start: 9, End: 14}},
 	})
 }
 
@@ -61,8 +61,8 @@ func TestNextToken_Whitespace(t *testing.T) {
 		input         string
 		expectedToken token.Token
 	}{
-		{"Skip horizontal tabs", "\t\thello\t", token.Token{Type: token.NAME, Literal: "hello", Position: token.Position{Start: 2, End: 7, Line: 1, Column: 3}}},
-		{"Skip leading spaces", "    hello", token.Token{Type: token.NAME, Literal: "hello", Position: token.Position{Start: 4, End: 9, Line: 1, Column: 5}}},
+		{"Skip horizontal tabs", "\t\thello\t", token.Token{Type: token.NAME, Literal: "hello", Start: 2, End: 7}},
+		{"Skip leading spaces", "    hello", token.Token{Type: token.NAME, Literal: "hello", Start: 4, End: 9}},
 	})
 }
 
@@ -73,33 +73,33 @@ func TestNextToken_ValidNumbers(t *testing.T) {
 		expectedToken token.Token
 	}{
 		// Integers
-		{"Integer zero", "0", token.Token{Type: token.INT, Literal: "0", Position: token.Position{Start: 0, End: 1, Line: 1, Column: 1}}},
-		{"Integer", "3", token.Token{Type: token.INT, Literal: "3", Position: token.Position{Start: 0, End: 1, Line: 1, Column: 1}}},
-		{"Negative integer", "-3", token.Token{Type: token.INT, Literal: "-3", Position: token.Position{Start: 0, End: 2, Line: 1, Column: 1}}},
+		{"Integer zero", "0", token.Token{Type: token.INT, Literal: "0", Start: 0, End: 1}},
+		{"Integer", "3", token.Token{Type: token.INT, Literal: "3", Start: 0, End: 1}},
+		{"Negative integer", "-3", token.Token{Type: token.INT, Literal: "-3", Start: 0, End: 2}},
 
 		// Floats without Exponent
-		{"Float", "3.1415", token.Token{Type: token.FLOAT, Literal: "3.1415", Position: token.Position{Start: 0, End: 6, Line: 1, Column: 1}}},
-		{"Float with leading zero", "0.123", token.Token{Type: token.FLOAT, Literal: "0.123", Position: token.Position{Start: 0, End: 5, Line: 1, Column: 1}}},
+		{"Float", "3.1415", token.Token{Type: token.FLOAT, Literal: "3.1415", Start: 0, End: 6}},
+		{"Float with leading zero", "0.123", token.Token{Type: token.FLOAT, Literal: "0.123", Start: 0, End: 5}},
 
 		// Negative floats without Exponent
-		{"Negative float", "-3.1415", token.Token{Type: token.FLOAT, Literal: "-3.1415", Position: token.Position{Start: 0, End: 7, Line: 1, Column: 1}}},
-		{"Negative float with leading zero", "-0.123", token.Token{Type: token.FLOAT, Literal: "-0.123", Position: token.Position{Start: 0, End: 6, Line: 1, Column: 1}}},
+		{"Negative float", "-3.1415", token.Token{Type: token.FLOAT, Literal: "-3.1415", Start: 0, End: 7}},
+		{"Negative float with leading zero", "-0.123", token.Token{Type: token.FLOAT, Literal: "-0.123", Start: 0, End: 6}},
 
 		// Floats with Exponent
-		{"Float with lowercase exponent", "12345e3", token.Token{Type: token.FLOAT, Literal: "12345e3", Position: token.Position{Start: 0, End: 7, Line: 1, Column: 1}}},
-		{"Float with uppercase exponent", "12345E3", token.Token{Type: token.FLOAT, Literal: "12345E3", Position: token.Position{Start: 0, End: 7, Line: 1, Column: 1}}},
-		{"Float with positive exponent sign", "12345e+3", token.Token{Type: token.FLOAT, Literal: "12345e+3", Position: token.Position{Start: 0, End: 8, Line: 1, Column: 1}}},
-		{"Float with negative exponent sign", "12345e-3", token.Token{Type: token.FLOAT, Literal: "12345e-3", Position: token.Position{Start: 0, End: 8, Line: 1, Column: 1}}},
-		{"Float with zero exponent", "12345e0", token.Token{Type: token.FLOAT, Literal: "12345e0", Position: token.Position{Start: 0, End: 7, Line: 1, Column: 1}}},
-		{"Float with large exponent", "1.2345e6789", token.Token{Type: token.FLOAT, Literal: "1.2345e6789", Position: token.Position{Start: 0, End: 11, Line: 1, Column: 1}}},
+		{"Float with lowercase exponent", "12345e3", token.Token{Type: token.FLOAT, Literal: "12345e3", Start: 0, End: 7}},
+		{"Float with uppercase exponent", "12345E3", token.Token{Type: token.FLOAT, Literal: "12345E3", Start: 0, End: 7}},
+		{"Float with positive exponent sign", "12345e+3", token.Token{Type: token.FLOAT, Literal: "12345e+3", Start: 0, End: 8}},
+		{"Float with negative exponent sign", "12345e-3", token.Token{Type: token.FLOAT, Literal: "12345e-3", Start: 0, End: 8}},
+		{"Float with zero exponent", "12345e0", token.Token{Type: token.FLOAT, Literal: "12345e0", Start: 0, End: 7}},
+		{"Float with large exponent", "1.2345e6789", token.Token{Type: token.FLOAT, Literal: "1.2345e6789", Start: 0, End: 11}},
 
 		// Negative Floats with Exponent
-		{"Negative float with lowercase exponent", "-1.2345e3", token.Token{Type: token.FLOAT, Literal: "-1.2345e3", Position: token.Position{Start: 0, End: 9, Line: 1, Column: 1}}},
-		{"Negative float with uppercase exponent", "-1.2345E3", token.Token{Type: token.FLOAT, Literal: "-1.2345E3", Position: token.Position{Start: 0, End: 9, Line: 1, Column: 1}}},
-		{"Negative float with positive exponent sign", "-1.2345e+3", token.Token{Type: token.FLOAT, Literal: "-1.2345e+3", Position: token.Position{Start: 0, End: 10, Line: 1, Column: 1}}},
-		{"Negative float with negative exponent sign", "-1.2345e-3", token.Token{Type: token.FLOAT, Literal: "-1.2345e-3", Position: token.Position{Start: 0, End: 10, Line: 1, Column: 1}}},
-		{"Negative float with zero exponent", "-1.2345e0", token.Token{Type: token.FLOAT, Literal: "-1.2345e0", Position: token.Position{Start: 0, End: 9, Line: 1, Column: 1}}},
-		{"Negative float with large exponent", "-1.2345e6789", token.Token{Type: token.FLOAT, Literal: "-1.2345e6789", Position: token.Position{Start: 0, End: 12, Line: 1, Column: 1}}},
+		{"Negative float with lowercase exponent", "-1.2345e3", token.Token{Type: token.FLOAT, Literal: "-1.2345e3", Start: 0, End: 9}},
+		{"Negative float with uppercase exponent", "-1.2345E3", token.Token{Type: token.FLOAT, Literal: "-1.2345E3", Start: 0, End: 9}},
+		{"Negative float with positive exponent sign", "-1.2345e+3", token.Token{Type: token.FLOAT, Literal: "-1.2345e+3", Start: 0, End: 10}},
+		{"Negative float with negative exponent sign", "-1.2345e-3", token.Token{Type: token.FLOAT, Literal: "-1.2345e-3", Start: 0, End: 10}},
+		{"Negative float with zero exponent", "-1.2345e0", token.Token{Type: token.FLOAT, Literal: "-1.2345e0", Start: 0, End: 9}},
+		{"Negative float with large exponent", "-1.2345e6789", token.Token{Type: token.FLOAT, Literal: "-1.2345e6789", Start: 0, End: 12}},
 	})
 }
 
@@ -207,32 +207,32 @@ func TestNextToken_ValidStrings(t *testing.T) {
 		input         string
 		expectedToken token.Token
 	}{
-		{"Empty", `""`, token.Token{Type: token.STRING_VALUE, Literal: "", Position: token.Position{Start: 0, End: 2, Line: 1, Column: 1}}},
-		{"Simple", `"hello"`, token.Token{Type: token.STRING_VALUE, Literal: "hello", Position: token.Position{Start: 0, End: 7, Line: 1, Column: 1}}},
-		{"Surrounded by whitespace", `" hello world "`, token.Token{Type: token.STRING_VALUE, Literal: " hello world ", Position: token.Position{Start: 0, End: 15, Line: 1, Column: 1}}},
+		{"Empty", `""`, token.Token{Type: token.STRING_VALUE, Literal: "", Start: 0, End: 2}},
+		{"Simple", `"hello"`, token.Token{Type: token.STRING_VALUE, Literal: "hello", Start: 0, End: 7}},
+		{"Surrounded by whitespace", `" hello world "`, token.Token{Type: token.STRING_VALUE, Literal: " hello world ", Start: 0, End: 15}},
 
 		// Escaped Characters
-		{"Escaped quote", `"hello \""`, token.Token{Type: token.STRING_VALUE, Literal: `hello "`, Position: token.Position{Start: 0, End: 10, Line: 1, Column: 1}}},
-		{"Escaped slashes", `"hello \\ \\\\ \/"`, token.Token{Type: token.STRING_VALUE, Literal: `hello \ \\ /`, Position: token.Position{Start: 0, End: 18, Line: 1, Column: 1}}},
-		{"Escaped control characters", `"hello \b\f\n\r\t"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \b\f\n\r\t", Position: token.Position{Start: 0, End: 18, Line: 1, Column: 1}}},
+		{"Escaped quote", `"hello \""`, token.Token{Type: token.STRING_VALUE, Literal: `hello "`, Start: 0, End: 10}},
+		{"Escaped slashes", `"hello \\ \\\\ \/"`, token.Token{Type: token.STRING_VALUE, Literal: `hello \ \\ /`, Start: 0, End: 18}},
+		{"Escaped control characters", `"hello \b\f\n\r\t"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \b\f\n\r\t", Start: 0, End: 18}},
 
 		// Unicode in BMP
-		{"Fixed-width escaped Unicode sequences", `"hello \u0123\u4567\u89AB\uCDEF"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \u0123\u4567\u89AB\uCDEF", Position: token.Position{Start: 0, End: 32, Line: 1, Column: 1}}},
-		{"Variable-width escaped Unicode sequences", `"hello \u{0123}\u{4567}\u{89AB}\u{CDEF}"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \u0123\u4567\u89AB\uCDEF", Position: token.Position{Start: 0, End: 40, Line: 1, Column: 1}}},
-		{"Fixed-width escaped Unicode with minimum width", `"hello \u0000"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \u0000", Position: token.Position{Start: 0, End: 14, Line: 1, Column: 1}}},
-		{"Variable-width escaped Unicode with minimum width", `"hello \u{0}"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \u0000", Position: token.Position{Start: 0, End: 13, Line: 1, Column: 1}}},
-		{"Zero-padded escaped Unicode with full width", `"hello \u{00000000}"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \u0000", Position: token.Position{Start: 0, End: 20, Line: 1, Column: 1}}},
+		{"Fixed-width escaped Unicode sequences", `"hello \u0123\u4567\u89AB\uCDEF"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \u0123\u4567\u89AB\uCDEF", Start: 0, End: 32}},
+		{"Variable-width escaped Unicode sequences", `"hello \u{0123}\u{4567}\u{89AB}\u{CDEF}"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \u0123\u4567\u89AB\uCDEF", Start: 0, End: 40}},
+		{"Fixed-width escaped Unicode with minimum width", `"hello \u0000"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \u0000", Start: 0, End: 14}},
+		{"Variable-width escaped Unicode with minimum width", `"hello \u{0}"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \u0000", Start: 0, End: 13}},
+		{"Zero-padded escaped Unicode with full width", `"hello \u{00000000}"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \u0000", Start: 0, End: 20}},
 
 		// Unicode beyond BMP
-		{"Unescaped Unicode beyond BMP", `"hello 🫶"`, token.Token{Type: token.STRING_VALUE, Literal: "hello 🫶", Position: token.Position{Start: 0, End: 12, Line: 1, Column: 1}}},
-		{"Escaped Unicode beyond BMP", `"hello \u{1F60E}"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \U0001F60E", Position: token.Position{Start: 0, End: 17, Line: 1, Column: 1}}},
-		{"Maximum unescaped Unicode beyond BMP", "\"hello \U0010FFFF\"", token.Token{Type: token.STRING_VALUE, Literal: "hello \U0010FFFF", Position: token.Position{Start: 0, End: 12, Line: 1, Column: 1}}},
-		{"Maximum escaped Unicode", `"hello \u{10FFFF}"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \U0010FFFF", Position: token.Position{Start: 0, End: 18, Line: 1, Column: 1}}},
+		{"Unescaped Unicode beyond BMP", `"hello 🫶"`, token.Token{Type: token.STRING_VALUE, Literal: "hello 🫶", Start: 0, End: 12}},
+		{"Escaped Unicode beyond BMP", `"hello \u{1F60E}"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \U0001F60E", Start: 0, End: 17}},
+		{"Maximum unescaped Unicode beyond BMP", "\"hello \U0010FFFF\"", token.Token{Type: token.STRING_VALUE, Literal: "hello \U0010FFFF", Start: 0, End: 12}},
+		{"Maximum escaped Unicode", `"hello \u{10FFFF}"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \U0010FFFF", Start: 0, End: 18}},
 
 		// Surrogate Pairs
-		{"Surrogate pair (heart emoji)", `"hello \uD83C\uDF0D"`, token.Token{Type: token.STRING_VALUE, Literal: "hello 🌍", Position: token.Position{Start: 0, End: 20, Line: 1, Column: 1}}},
-		{"Minimum surrogate pair", `"hello \uD800\uDC00"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \U00010000", Position: token.Position{Start: 0, End: 20, Line: 1, Column: 1}}},
-		{"Maximum surrogate pair", `"hello \uDBFF\uDFFF"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \U0010FFFF", Position: token.Position{Start: 0, End: 20, Line: 1, Column: 1}}},
+		{"Surrogate pair (heart emoji)", `"hello \uD83C\uDF0D"`, token.Token{Type: token.STRING_VALUE, Literal: "hello 🌍", Start: 0, End: 20}},
+		{"Minimum surrogate pair", `"hello \uD800\uDC00"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \U00010000", Start: 0, End: 20}},
+		{"Maximum surrogate pair", `"hello \uDBFF\uDFFF"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \U0010FFFF", Start: 0, End: 20}},
 	})
 }
 
@@ -280,23 +280,23 @@ func TestNextToken_ValidBlockStrings(t *testing.T) {
 		input         string
 		expectedToken token.Token
 	}{
-		{"Empty", `""""""`, token.Token{Type: token.STRING_VALUE, Literal: ``, Position: token.Position{Start: 0, End: 6, Line: 1, Column: 1}}},
-		{"Simple", `"""hello"""`, token.Token{Type: token.STRING_VALUE, Literal: `hello`, Position: token.Position{Start: 0, End: 11, Line: 1, Column: 1}}},
-		{"Surrounded by whitespace", `""" hello world """`, token.Token{Type: token.STRING_VALUE, Literal: ` hello world `, Position: token.Position{Start: 0, End: 19, Line: 1, Column: 1}}},
-		{"Quote", `"""hello " world"""`, token.Token{Type: token.STRING_VALUE, Literal: `hello " world`, Position: token.Position{Start: 0, End: 19, Line: 1, Column: 1}}},
-		{"Triple quotes", `"""hello \""" world"""`, token.Token{Type: token.STRING_VALUE, Literal: `hello """ world`, Position: token.Position{Start: 0, End: 22, Line: 1, Column: 1}}},
-		{"Newlines", "\"\"\"hello\nworld\"\"\"", token.Token{Type: token.STRING_VALUE, Literal: "hello\nworld", Position: token.Position{Start: 0, End: 17, Line: 1, Column: 1}}},
-		{"Normalized newlines", "\"\"\"foo\rbar\r\nbaz\"\"\"", token.Token{Type: token.STRING_VALUE, Literal: "foo\nbar\nbaz", Position: token.Position{Start: 0, End: 18, Line: 1, Column: 1}}},
-		{"Slashes", `"""hello \ /"""`, token.Token{Type: token.STRING_VALUE, Literal: `hello \ /`, Position: token.Position{Start: 0, End: 15, Line: 1, Column: 1}}},
-		{"Unescaped control characters", `"""hello \b\f\n\r\t"""`, token.Token{Type: token.STRING_VALUE, Literal: `hello \b\f\n\r\t`, Position: token.Position{Start: 0, End: 22, Line: 1, Column: 1}}},
-		{"Unescaped Unicode", `"""hello 🫶"""`, token.Token{Type: token.STRING_VALUE, Literal: "hello 🫶", Position: token.Position{Start: 0, End: 16, Line: 1, Column: 1}}},
+		{"Empty", `""""""`, token.Token{Type: token.STRING_VALUE, Literal: ``, Start: 0, End: 6}},
+		{"Simple", `"""hello"""`, token.Token{Type: token.STRING_VALUE, Literal: `hello`, Start: 0, End: 11}},
+		{"Surrounded by whitespace", `""" hello world """`, token.Token{Type: token.STRING_VALUE, Literal: ` hello world `, Start: 0, End: 19}},
+		{"Quote", `"""hello " world"""`, token.Token{Type: token.STRING_VALUE, Literal: `hello " world`, Start: 0, End: 19}},
+		{"Triple quotes", `"""hello \""" world"""`, token.Token{Type: token.STRING_VALUE, Literal: `hello """ world`, Start: 0, End: 22}},
+		{"Newlines", "\"\"\"hello\nworld\"\"\"", token.Token{Type: token.STRING_VALUE, Literal: "hello\nworld", Start: 0, End: 17}},
+		{"Normalized newlines", "\"\"\"foo\rbar\r\nbaz\"\"\"", token.Token{Type: token.STRING_VALUE, Literal: "foo\nbar\nbaz", Start: 0, End: 18}},
+		{"Slashes", `"""hello \ /"""`, token.Token{Type: token.STRING_VALUE, Literal: `hello \ /`, Start: 0, End: 15}},
+		{"Unescaped control characters", `"""hello \b\f\n\r\t"""`, token.Token{Type: token.STRING_VALUE, Literal: `hello \b\f\n\r\t`, Start: 0, End: 22}},
+		{"Unescaped Unicode", `"""hello 🫶"""`, token.Token{Type: token.STRING_VALUE, Literal: "hello 🫶", Start: 0, End: 16}},
 		{"Multiple lines", `"""
 
         foo
             bar
                 baz
 
-        """`, token.Token{Type: token.STRING_VALUE, Literal: "foo\n    bar\n        baz", Position: token.Position{Start: 0, End: 65, Line: 1, Column: 1}}},
+        """`, token.Token{Type: token.STRING_VALUE, Literal: "foo\n    bar\n        baz", Start: 0, End: 65}},
 	})
 }
 
@@ -322,9 +322,10 @@ func TestNextToken_NextTokenAfterBlockStrings(t *testing.T) {
             """ next_token`
 
 	expectedToken := token.Token{
-		Type:     token.NAME,
-		Literal:  `next_token`,
-		Position: token.Position{Start: 82, End: 92, Line: 7, Column: 17},
+		Type:    token.NAME,
+		Literal: `next_token`,
+		Start:   82,
+		End:     92,
 	}
 
 	l := New(input)
@@ -348,10 +349,10 @@ func TestNextToken_ValidComments(t *testing.T) {
 		input         string
 		expectedToken token.Token
 	}{
-		{"Simple", "# hello", token.Token{Type: token.COMMENT, Literal: " hello", Position: token.Position{Start: 0, End: 7, Line: 1, Column: 1}}},
-		{"Newline", "# hello\nworld", token.Token{Type: token.COMMENT, Literal: " hello", Position: token.Position{Start: 0, End: 7, Line: 1, Column: 1}}},
-		{"Carriage return", "# hello\r\nworld", token.Token{Type: token.COMMENT, Literal: " hello", Position: token.Position{Start: 0, End: 7, Line: 1, Column: 1}}},
-		{"Emoji", "# hello 🫶", token.Token{Type: token.COMMENT, Literal: " hello 🫶", Position: token.Position{Start: 0, End: 12, Line: 1, Column: 1}}},
+		{"Simple", "# hello", token.Token{Type: token.COMMENT, Literal: " hello", Start: 0, End: 7}},
+		{"Newline", "# hello\nworld", token.Token{Type: token.COMMENT, Literal: " hello", Start: 0, End: 7}},
+		{"Carriage return", "# hello\r\nworld", token.Token{Type: token.COMMENT, Literal: " hello", Start: 0, End: 7}},
+		{"Emoji", "# hello 🫶", token.Token{Type: token.COMMENT, Literal: " hello 🫶", Start: 0, End: 12}},
 	})
 }
 
@@ -388,33 +389,33 @@ func TestNextToken_Query(t *testing.T) {
        }`
 
 	expectedTokens := []token.Token{
-		{Type: token.NAME, Literal: "query", Position: token.Position{Start: 0, End: 5, Line: 1, Column: 1}},
-		{Type: token.LBRACE, Position: token.Position{Start: 6, End: 7, Line: 1, Column: 7}},
-		{Type: token.NAME, Literal: "user", Position: token.Position{Start: 19, End: 23, Line: 2, Column: 12}},
-		{Type: token.LPAREN, Position: token.Position{Start: 23, End: 24, Line: 2, Column: 16}},
-		{Type: token.NAME, Literal: "id", Position: token.Position{Start: 24, End: 26, Line: 2, Column: 17}},
-		{Type: token.COLON, Position: token.Position{Start: 26, End: 27, Line: 2, Column: 19}},
-		{Type: token.INT, Literal: "123", Position: token.Position{Start: 28, End: 31, Line: 2, Column: 21}},
-		{Type: token.RPAREN, Position: token.Position{Start: 31, End: 32, Line: 2, Column: 24}},
-		{Type: token.LBRACE, Position: token.Position{Start: 33, End: 34, Line: 2, Column: 26}},
-		{Type: token.NAME, Literal: "name", Position: token.Position{Start: 50, End: 54, Line: 3, Column: 16}},
-		{Type: token.NAME, Literal: "friends", Position: token.Position{Start: 70, End: 77, Line: 4, Column: 16}},
-		{Type: token.LPAREN, Position: token.Position{Start: 77, End: 78, Line: 4, Column: 23}},
-		{Type: token.NAME, Literal: "first", Position: token.Position{Start: 78, End: 83, Line: 4, Column: 24}},
-		{Type: token.COLON, Position: token.Position{Start: 83, End: 84, Line: 4, Column: 29}},
-		{Type: token.INT, Literal: "10", Position: token.Position{Start: 85, End: 87, Line: 4, Column: 31}},
-		{Type: token.RPAREN, Position: token.Position{Start: 87, End: 88, Line: 4, Column: 33}},
-		{Type: token.LBRACE, Position: token.Position{Start: 89, End: 90, Line: 4, Column: 35}},
-		{Type: token.NAME, Literal: "edges", Position: token.Position{Start: 110, End: 115, Line: 5, Column: 20}},
-		{Type: token.LBRACE, Position: token.Position{Start: 116, End: 117, Line: 5, Column: 26}},
-		{Type: token.NAME, Literal: "node", Position: token.Position{Start: 141, End: 145, Line: 6, Column: 24}},
-		{Type: token.LBRACE, Position: token.Position{Start: 146, End: 147, Line: 6, Column: 29}},
-		{Type: token.NAME, Literal: "name", Position: token.Position{Start: 175, End: 179, Line: 7, Column: 28}},
-		{Type: token.RBRACE, Position: token.Position{Start: 203, End: 204, Line: 8, Column: 24}},
-		{Type: token.RBRACE, Position: token.Position{Start: 224, End: 225, Line: 9, Column: 20}},
-		{Type: token.RBRACE, Position: token.Position{Start: 241, End: 242, Line: 10, Column: 16}},
-		{Type: token.RBRACE, Position: token.Position{Start: 254, End: 255, Line: 11, Column: 12}},
-		{Type: token.RBRACE, Position: token.Position{Start: 263, End: 264, Line: 12, Column: 8}},
+		{Type: token.NAME, Literal: "query", Start: 0, End: 5},
+		{Type: token.LBRACE, Start: 6, End: 7},
+		{Type: token.NAME, Literal: "user", Start: 19, End: 23},
+		{Type: token.LPAREN, Start: 23, End: 24},
+		{Type: token.NAME, Literal: "id", Start: 24, End: 26},
+		{Type: token.COLON, Start: 26, End: 27},
+		{Type: token.INT, Literal: "123", Start: 28, End: 31},
+		{Type: token.RPAREN, Start: 31, End: 32},
+		{Type: token.LBRACE, Start: 33, End: 34},
+		{Type: token.NAME, Literal: "name", Start: 50, End: 54},
+		{Type: token.NAME, Literal: "friends", Start: 70, End: 77},
+		{Type: token.LPAREN, Start: 77, End: 78},
+		{Type: token.NAME, Literal: "first", Start: 78, End: 83},
+		{Type: token.COLON, Start: 83, End: 84},
+		{Type: token.INT, Literal: "10", Start: 85, End: 87},
+		{Type: token.RPAREN, Start: 87, End: 88},
+		{Type: token.LBRACE, Start: 89, End: 90},
+		{Type: token.NAME, Literal: "edges", Start: 110, End: 115},
+		{Type: token.LBRACE, Start: 116, End: 117},
+		{Type: token.NAME, Literal: "node", Start: 141, End: 145},
+		{Type: token.LBRACE, Start: 146, End: 147},
+		{Type: token.NAME, Literal: "name", Start: 175, End: 179},
+		{Type: token.RBRACE, Start: 203, End: 204},
+		{Type: token.RBRACE, Start: 224, End: 225},
+		{Type: token.RBRACE, Start: 241, End: 242},
+		{Type: token.RBRACE, Start: 254, End: 255},
+		{Type: token.RBRACE, Start: 263, End: 264},
 	}
 
 	l := New(input)

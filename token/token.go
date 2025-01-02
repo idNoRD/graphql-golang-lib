@@ -30,13 +30,43 @@ const (
 	COMMENT
 )
 
+var types = [...]string{
+	EOF: "EOF",
+
+	BANG:   "BANG",
+	DOLLAR: "DOLLAR",
+	AMP:    "AMP",
+	LPAREN: "LPAREN",
+	RPAREN: "RPAREN",
+	SPREAD: "SPREAD",
+	COLON:  "COLON",
+	EQUALS: "EQUALS",
+	AT:     "AT",
+	LBRACK: "LBRACK",
+	RBRACK: "RBRACK",
+	LBRACE: "LBRACE",
+	PIPE:   "PIPE",
+	RBRACE: "RBRACE",
+
+	NAME:         "NAME",
+	INT:          "INT",
+	FLOAT:        "FLOAT",
+	STRING_VALUE: "STRING_VALUE",
+	COMMENT:      "COMMENT",
+}
+
+func (t Type) String() string {
+	return types[t]
+}
+
 // Token represents a lexical token.
 type Token struct {
 	Type    Type
 	Literal string
-	Position
+	Start   int
+	End     int
 }
 
 func (t Token) String() string {
-	return fmt.Sprintf("%s(%s) at %d:%d (%d-%d)", t.Type, t.Literal, t.Line, t.Column, t.Start, t.End)
+	return fmt.Sprintf("%s(%s) at %d-%d", types[t.Type], t.Literal, t.Start, t.End)
 }

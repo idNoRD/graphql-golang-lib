@@ -68,53 +68,22 @@ func (l *Lexer) readChar() {
 	l.column++
 }
 
-func (l *Lexer) readCharUnoptimized() {
-	if l.ch == '\r' {
-		l.line++
-		l.column = 0
-		if l.rdOffset < len(l.input) && l.input[l.rdOffset] == '\n' {
-			l.rdOffset++
-		}
-	} else if l.ch == '\n' {
-		l.line++
-		l.column = 0
-	}
-
-	if l.rdOffset < len(l.input) {
-		l.offset = l.rdOffset
-		ch, w := decodeRuneAt(l.input[l.rdOffset:])
-		l.ch = ch
-		l.rdOffset += w
-	} else {
-		l.ch = 0
-		l.offset = len(l.input)
-	}
-	l.column++
-}
-
-func (l *Lexer) NextToken() (token.Token, error) {
+func (l *Lexer) NextToken() (tok token.Token, err error) {
 	l.skipInsignificantChars()
 
 	l.savedCursor = cursor{}
 
-	tok := token.Token{
-		Position: token.Position{
-			Start:  l.offset,
-			Line:   l.line,
-			Column: l.column,
-		},
-	}
+	tok.Start = l.offset
 
 	switch {
 	case isNameStart(l.ch):
 		tok.Type = token.NAME
 		tok.Literal = l.readName()
 	case isDigit(l.ch) || l.ch == '-':
-		t, l, err := l.readNumber()
+		tok.Type, tok.Literal, err = l.readNumber()
 		if err != nil {
-			return token.Token{}, err
+			return
 		}
-		tok.Type, tok.Literal = t, l
 	default:
 		switch l.ch {
 		case '!':
@@ -141,9 +110,11 @@ func (l *Lexer) NextToken() (token.Token, error) {
 				l.readChar()
 				tok.Type = token.SPREAD
 			case isDigit(ch):
-				return token.Token{}, l.newLexError(fmt.Errorf("invalid number, expected digit before '.'"))
+				err = l.newLexError(fmt.Errorf("invalid number, expected digit before '.'"))
+				return
 			default:
-				return token.Token{}, l.newLexError(errors.New("unexpected '.'"))
+				err = l.newLexError(errors.New("unexpected '.'"))
+				return
 			}
 		case ':':
 			tok.Type = token.COLON
@@ -172,17 +143,15 @@ func (l *Lexer) NextToken() (token.Token, error) {
 		case '"':
 			tok.Type = token.STRING_VALUE
 			if l.peekChar() == '"' && l.peekCharAt(1) == '"' {
-				literal, err := l.readBlockString()
+				tok.Literal, err = l.readBlockString()
 				if err != nil {
-					return token.Token{}, err
+					return
 				}
-				tok.Literal = literal
 			} else {
-				literal, err := l.readString()
+				tok.Literal, err = l.readString()
 				if err != nil {
-					return token.Token{}, err
+					return
 				}
-				tok.Literal = literal
 			}
 		case '#':
 			tok.Type = token.COMMENT
@@ -190,11 +159,12 @@ func (l *Lexer) NextToken() (token.Token, error) {
 		case eof:
 			tok.Type = token.EOF
 		default:
-			return token.Token{}, l.newLexError(fmt.Errorf("unexpected character '%s'", printChar(l.ch)))
+			err = l.newLexError(fmt.Errorf("unexpected character '%s'", printChar(l.ch)))
+			return
 		}
 	}
 	tok.End = l.offset
-	return tok, nil
+	return
 }
 
 func (l *Lexer) readName() string {
@@ -273,23 +243,8 @@ func (l *Lexer) readString() (string, error) {
 		if l.ch == '\\' { // EscapedCharacter and EscapedUnicode
 			l.saveCurrentCursor()
 			l.readChar()
+
 			switch l.ch {
-			case '"':
-				result.WriteByte('"')
-			case '\\':
-				result.WriteByte('\\')
-			case '/':
-				result.WriteByte('/')
-			case 'b':
-				result.WriteByte('\b')
-			case 'f':
-				result.WriteByte('\f')
-			case 'n':
-				result.WriteByte('\n')
-			case 'r':
-				result.WriteByte('\r')
-			case 't':
-				result.WriteByte('\t')
 			case 'u':
 				char, err := l.readEscapedUnicode()
 				if err != nil {
@@ -297,7 +252,11 @@ func (l *Lexer) readString() (string, error) {
 				}
 				result.WriteRune(char)
 			default:
-				return "", l.newLexError(fmt.Errorf("unknown escape sequence '\\%c'", l.ch))
+				if esc, ok := escapeChars[l.ch]; ok {
+					result.WriteByte(esc)
+				} else {
+					return "", l.newLexError(fmt.Errorf("unknown escape sequence '\\%c'", l.ch))
+				}
 			}
 		} else {
 			result.WriteRune(l.ch)

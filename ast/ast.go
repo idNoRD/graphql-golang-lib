@@ -8,12 +8,8 @@ type Node interface {
 
 // Document is root node.
 type Document struct {
-	Position    int
 	Definitions []Definition
 }
-
-func (d *Document) Pos() int { return d.Position }
-func (d *Document) End() int { return -1 }
 
 // Definition can be Executable, TypeSystem, or Extension.
 type Definition interface {
@@ -39,9 +35,9 @@ type OperationDefinition struct {
 	Position      int
 	OperationType OperationType
 	Name          *Name
-	VariableDefs  VariablesDefinition
-	Directives    Directives
-	SelectionSet  SelectionSet
+	VariableDefs  []*VariableDefinition
+	Directives    []*Directive
+	SelectionSet  *SelectionSet
 }
 
 func (o *OperationDefinition) Pos() int        { return o.Position }
@@ -53,10 +49,10 @@ func (o *OperationDefinition) definitionNode() {}
 // https://spec.graphql.org/draft/#FragmentDefinition
 type FragmentDefinition struct {
 	Position      int
-	Name          Name
-	TypeCondition NamedType
-	Directives    Directives
-	SelectionSet  SelectionSet
+	Name          *Name
+	TypeCondition *NamedType
+	Directives    []*Directive
+	SelectionSet  *SelectionSet
 }
 
 func (f *FragmentDefinition) Pos() int        { return f.Position }
@@ -77,8 +73,8 @@ type TypeDefinition interface {
 type SchemaDefinition struct {
 	Position          int
 	Description       *StringValue
-	Directives        []Directive
-	RootOperationDefs []RootOperationTypeDefinition
+	Directives        []*Directive
+	RootOperationDefs []*RootOperationTypeDefinition
 }
 
 func (s *SchemaDefinition) Pos() int                  { return s.Position }
@@ -92,7 +88,7 @@ func (s *SchemaDefinition) typeSystemDefinitionNode() {}
 type RootOperationTypeDefinition struct {
 	Position      int
 	OperationType OperationType
-	Type          NamedType
+	Type          *NamedType
 }
 
 func (r *RootOperationTypeDefinition) Pos() int { return r.Position }
@@ -104,7 +100,7 @@ func (r *RootOperationTypeDefinition) End() int { return -1 }
 type ScalarTypeExtension struct {
 	Position   int
 	Name       Name
-	Directives []Directive
+	Directives []*Directive
 }
 
 func (s *ScalarTypeExtension) Pos() int                 { return s.Position }
@@ -118,9 +114,9 @@ func (s *ScalarTypeExtension) typeSystemExtensionNode() {}
 type ObjectTypeExtension struct {
 	Position   int
 	Name       Name
-	Interfaces []NamedType
-	Directives []Directive
-	Fields     []FieldDefinition
+	Interfaces []*NamedType
+	Directives []*Directive
+	Fields     []*FieldDefinition
 }
 
 func (o *ObjectTypeExtension) Pos() int                 { return o.Position }
@@ -136,10 +132,10 @@ func (o *ObjectTypeExtension) typeSystemExtensionNode() {}
 type FieldDefinition struct {
 	Position    int
 	Description *StringValue
-	Name        Name
-	Arguments   []InputValueDefinition
+	Name        *Name
+	Arguments   []*InputValueDefinition
 	Type        Type
-	Directives  []Directive
+	Directives  []*Directive
 }
 
 func (f *FieldDefinition) Pos() int { return f.Position }
@@ -151,10 +147,10 @@ func (f *FieldDefinition) End() int { return -1 }
 type InterfaceTypeDefinition struct {
 	Position    int
 	Description *StringValue
-	Name        Name
-	Interfaces  []NamedType
-	Directives  []Directive
-	Fields      []FieldDefinition
+	Name        *Name
+	Interfaces  []*NamedType
+	Directives  []*Directive
+	Fields      []*FieldDefinition
 }
 
 func (i *InterfaceTypeDefinition) Pos() int                  { return i.Position }
@@ -168,9 +164,9 @@ func (i *InterfaceTypeDefinition) typeSystemDefinitionNode() {}
 type UnionTypeDefinition struct {
 	Position    int
 	Description *StringValue
-	Name        Name
-	Directives  []Directive
-	Types       []NamedType
+	Name        *Name
+	Directives  []*Directive
+	Types       []*NamedType
 }
 
 func (u *UnionTypeDefinition) Pos() int                  { return u.Position }
@@ -184,9 +180,9 @@ func (u *UnionTypeDefinition) typeSystemDefinitionNode() {}
 type EnumTypeDefinition struct {
 	Position    int
 	Description *StringValue
-	Name        Name
-	Directives  []Directive
-	Values      []EnumValueDefinition
+	Name        *Name
+	Directives  []*Directive
+	Values      []*EnumValueDefinition
 }
 
 func (e *EnumTypeDefinition) Pos() int                  { return e.Position }
@@ -200,8 +196,8 @@ func (e *EnumTypeDefinition) typeSystemDefinitionNode() {}
 type EnumValueDefinition struct {
 	Position    int
 	Description *StringValue
-	Name        Name
-	Directives  []Directive
+	Name        *Name
+	Directives  []*Directive
 }
 
 func (e *EnumValueDefinition) Pos() int { return e.Position }
@@ -213,9 +209,9 @@ func (e *EnumValueDefinition) End() int { return -1 }
 type InputObjectTypeDefinition struct {
 	Position    int
 	Description *StringValue
-	Name        Name
-	Directives  []Directive
-	Fields      []InputValueDefinition
+	Name        *Name
+	Directives  []*Directive
+	Fields      []*InputValueDefinition
 }
 
 func (i *InputObjectTypeDefinition) Pos() int                  { return i.Position }
@@ -229,10 +225,10 @@ func (i *InputObjectTypeDefinition) typeSystemDefinitionNode() {}
 type InputValueDefinition struct {
 	Position     int
 	Description  *StringValue
-	Name         Name
+	Name         *Name
 	Type         Type
 	DefaultValue Value
-	Directives   []Directive
+	Directives   []*Directive
 }
 
 func (i *InputValueDefinition) Pos() int { return i.Position }
@@ -244,9 +240,9 @@ func (i *InputValueDefinition) End() int { return -1 }
 type DirectiveDefinition struct {
 	Position    int
 	Description *StringValue
-	Name        Name
-	Arguments   []InputValueDefinition
-	Locations   []Name
+	Name        *Name
+	Arguments   []*InputValueDefinition
+	Locations   []*Name
 }
 
 func (d *DirectiveDefinition) Pos() int                  { return d.Position }
@@ -267,8 +263,8 @@ type TypeSystemExtension interface {
 // https://spec.graphql.org/draft/#SchemaExtension
 type SchemaExtension struct {
 	Position          int
-	Directives        []Directive
-	RootOperationDefs []RootOperationTypeDefinition
+	Directives        []*Directive
+	RootOperationDefs []*RootOperationTypeDefinition
 }
 
 func (s *SchemaExtension) Pos() int                 { return s.Position }
@@ -282,8 +278,8 @@ func (s *SchemaExtension) typeSystemExtensionNode() {}
 type ScalarTypeDefinition struct {
 	Position    int
 	Description *StringValue
-	Name        Name
-	Directives  []Directive
+	Name        *Name
+	Directives  []*Directive
 }
 
 func (s *ScalarTypeDefinition) Pos() int                  { return s.Position }
@@ -297,10 +293,10 @@ func (s *ScalarTypeDefinition) typeSystemDefinitionNode() {}
 type ObjectTypeDefinition struct {
 	Position    int
 	Description *StringValue
-	Name        Name
-	Interfaces  []NamedType
-	Directives  []Directive
-	Fields      []FieldDefinition
+	Name        *Name
+	Interfaces  []*NamedType
+	Directives  []*Directive
+	Fields      []*FieldDefinition
 }
 
 func (o *ObjectTypeDefinition) Pos() int                  { return o.Position }
@@ -333,9 +329,9 @@ type Selection interface {
 type Field struct {
 	Position     int
 	Alias        *Name
-	Name         Name
-	Arguments    Arguments
-	Directives   Directives
+	Name         *Name
+	Arguments    []*Argument
+	Directives   []*Directive
 	SelectionSet *SelectionSet
 }
 
@@ -348,8 +344,8 @@ func (f *Field) selectionNode() {}
 // https://spec.graphql.org/draft/#FragmentSpread
 type FragmentSpread struct {
 	Position   int
-	Name       Name
-	Directives Directives
+	Name       *Name
+	Directives []*Directive
 }
 
 func (fs *FragmentSpread) Pos() int       { return fs.Position }
@@ -362,8 +358,8 @@ func (fs *FragmentSpread) selectionNode() {}
 type InlineFragment struct {
 	Position      int
 	TypeCondition *NamedType
-	Directives    Directives
-	SelectionSet  SelectionSet
+	Directives    []*Directive
+	SelectionSet  *SelectionSet
 }
 
 func (inf *InlineFragment) Pos() int       { return inf.Position }
@@ -375,29 +371,24 @@ func (inf *InlineFragment) selectionNode() {}
 // https://spec.graphql.org/draft/#Directive
 type Directive struct {
 	Position  int
-	Name      Name
-	Arguments Arguments
+	Name      *Name
+	Arguments []*Argument
 }
 
-// Directives
-//
-// https://spec.graphql.org/draft/#Directives
-type Directives = []Directive
+//// Directives
+////
+//// https://spec.graphql.org/draft/#Directives
+//type Directives = []Directive
 
 func (d *Directive) Pos() int { return d.Position }
 func (d *Directive) End() int { return -1 }
-
-// Arguments
-//
-// https://spec.graphql.org/draft/#Arguments
-type Arguments = []Argument
 
 // Argument
 //
 // https://spec.graphql.org/draft/#Argument
 type Argument struct {
 	Position int
-	Name     Name
+	Name     *Name
 	Value    Value
 }
 
@@ -502,7 +493,7 @@ func (v *ListValue) valueNode() {}
 // https://spec.graphql.org/draft/#ObjectValue
 type ObjectValue struct {
 	Position int
-	Fields   []ObjectField
+	Fields   []*ObjectField
 }
 
 func (v *ObjectValue) Pos() int   { return v.Position }
@@ -514,7 +505,7 @@ func (v *ObjectValue) valueNode() {}
 // https://spec.graphql.org/draft/#ObjectField
 type ObjectField struct {
 	Position int
-	Name     Name
+	Name     *Name
 	Value    Value
 }
 
@@ -526,27 +517,22 @@ func (o *ObjectField) End() int { return -1 }
 // https://spec.graphql.org/draft/#Variable
 type Variable struct {
 	Position int
-	Name     Name
+	Name     *Name
 }
 
 func (v *Variable) Pos() int   { return v.Position }
 func (v *Variable) End() int   { return -1 }
 func (v *Variable) valueNode() {}
 
-// VariablesDefinition
-//
-// https://spec.graphql.org/draft/#VariablesDefinition
-type VariablesDefinition = []VariableDefinition
-
 // VariableDefinition
 //
 // https://spec.graphql.org/draft/#VariableDefinition
 type VariableDefinition struct {
 	Position     int
-	Variable     Variable
+	Variable     *Variable
 	Type         Type
 	DefaultValue Value
-	Directives   Directives
+	Directives   []*Directive
 }
 
 func (vd *VariableDefinition) Pos() int { return vd.Position }
@@ -565,7 +551,7 @@ type Type interface {
 // https://spec.graphql.org/draft/#NamedType
 type NamedType struct {
 	Position int
-	Name     Name
+	Name     *Name
 }
 
 func (n *NamedType) Pos() int  { return n.Position }
