@@ -359,9 +359,6 @@ func (p *Parser) parseField() (ast.Selection, error) {
 		}
 		field.Alias = alias
 
-		if err := p.expect(token.COLON); err != nil {
-			return nil, err
-		}
 		if err := p.next(); err != nil {
 			return nil, err
 		}
