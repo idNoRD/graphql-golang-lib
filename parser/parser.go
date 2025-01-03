@@ -187,10 +187,7 @@ func (p *Parser) parseVariableDefinition() (*ast.VariableDefinition, error) {
 	}
 	vd.Variable = variable
 
-	if err := p.expect(token.COLON); err != nil {
-		return nil, err
-	}
-	if err := p.next(); err != nil {
+	if err := p.expectAndAdvance(token.COLON); err != nil {
 		return nil, err
 	}
 
