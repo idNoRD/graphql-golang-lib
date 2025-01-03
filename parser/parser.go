@@ -519,10 +519,7 @@ func (p *Parser) parseArgument() (*ast.Argument, error) {
 	}
 	arg.Name = name
 
-	if err := p.expect(token.COLON); err != nil {
-		return nil, err
-	}
-	if err := p.next(); err != nil {
+	if err := p.expectAndAdvance(token.COLON); err != nil {
 		return nil, err
 	}
 
