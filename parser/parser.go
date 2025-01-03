@@ -679,10 +679,7 @@ func (p *Parser) parseObjectField() (*ast.ObjectField, error) {
 	}
 	of.Name = name
 
-	if err := p.expect(token.COLON); err != nil {
-		return nil, err
-	}
-	if err := p.next(); err != nil {
+	if err := p.expectAndAdvance(token.COLON); err != nil {
 		return nil, err
 	}
 
