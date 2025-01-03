@@ -58,6 +58,27 @@ func (p *Parser) expect(tokType token.Type) error {
 	return nil
 }
 
+func (p *Parser) expectAndAdvance(tokType token.Type) (token.Token, error) {
+	if p.curToken.Type != tokType {
+		return token.Token{}, fmt.Errorf("expected token %s, got %s", tokType, p.curToken.Type)
+	}
+	tok := p.curToken
+	if err := p.next(); err != nil {
+		return token.Token{}, err
+	}
+	return tok, nil
+}
+
+func (p *Parser) consumeIfMatch(tokType token.Type) (bool, error) {
+	if p.curToken.Type != tokType {
+		return false, nil
+	}
+	if err := p.next(); err != nil {
+		return true, err
+	}
+	return true, nil
+}
+
 func (p *Parser) parseDefinition() (ast.Definition, error) {
 	if p.peekToken.Type == token.LBRACE {
 		if err := p.next(); err != nil {
@@ -77,38 +98,38 @@ func (p *Parser) parseDefinition() (ast.Definition, error) {
 }
 
 func (p *Parser) parseOperationType() (ast.OperationType, error) {
-	op := ast.OperationType(p.curToken.Literal)
-	if err := p.next(); err != nil {
-		return op, err
+	tok, err := p.expectAndAdvance(token.NAME)
+	if err != nil {
+		return "", err
 	}
-	return op, nil
+	return ast.OperationType(tok.Literal), nil
 }
 
 func (p *Parser) parseOperationDefinition() (*ast.OperationDefinition, error) {
-	ot, err := p.parseOperationType()
+	op := &ast.OperationDefinition{
+		Position: p.curToken.Start,
+	}
+
+	opType, err := p.parseOperationType()
 	if err != nil {
 		return nil, err
 	}
-
-	op := &ast.OperationDefinition{
-		OperationType: ot,
-	}
+	op.OperationType = opType
 
 	if p.curToken.Type == token.NAME {
-		op.Name = &ast.Name{
-			Value: p.curToken.Literal,
-		}
-		if err := p.next(); err != nil {
-			return nil, err
-		}
-	}
-
-	if p.curToken.Type == token.LPAREN {
-		vars, err := p.parseVariableDefinitions()
+		name, err := p.parseName()
 		if err != nil {
 			return nil, err
 		}
-		op.VariableDefs = vars
+		op.Name = name
+	}
+
+	if p.curToken.Type == token.LPAREN {
+		varDefs, err := p.parseVariableDefinitions()
+		if err != nil {
+			return nil, err
+		}
+		op.VariableDefs = varDefs
 	}
 
 	directives, err := p.parseDirectives()
@@ -117,22 +138,30 @@ func (p *Parser) parseOperationDefinition() (*ast.OperationDefinition, error) {
 	}
 	op.Directives = directives
 
-	ss, err := p.parseSelectionSet()
+	selectionSet, err := p.parseSelectionSet()
 	if err != nil {
 		return nil, err
 	}
-	op.SelectionSet = ss
+	op.SelectionSet = selectionSet
 
 	return op, nil
+}
+
+func (p *Parser) parseName() (*ast.Name, error) {
+	tok, err := p.expectAndAdvance(token.NAME)
+	if err != nil {
+		return nil, err
+	}
+	return &ast.Name{
+		Position: tok.Start,
+		Value:    tok.Literal,
+	}, nil
 }
 
 func (p *Parser) parseVariableDefinitions() ([]*ast.VariableDefinition, error) {
 	var defs []*ast.VariableDefinition
 
-	if err := p.expect(token.LPAREN); err != nil {
-		return nil, err
-	}
-	if err := p.next(); err != nil {
+	if _, err := p.expectAndAdvance(token.LPAREN); err != nil {
 		return nil, err
 	}
 
@@ -144,10 +173,7 @@ func (p *Parser) parseVariableDefinitions() ([]*ast.VariableDefinition, error) {
 		defs = append(defs, def)
 	}
 
-	if err := p.expect(token.RPAREN); err != nil {
-		return nil, err
-	}
-	if err := p.next(); err != nil {
+	if _, err := p.expectAndAdvance(token.RPAREN); err != nil {
 		return nil, err
 	}
 
@@ -169,10 +195,7 @@ func (p *Parser) parseVariableDefinition() (*ast.VariableDefinition, error) {
 	}
 	vd.Variable = variable
 
-	if err := p.expect(token.COLON); err != nil {
-		return nil, err
-	}
-	if err := p.next(); err != nil {
+	if _, err := p.expectAndAdvance(token.COLON); err != nil {
 		return nil, err
 	}
 
@@ -205,22 +228,18 @@ func (p *Parser) parseVariableDefinition() (*ast.VariableDefinition, error) {
 func (p *Parser) parseType() (ast.Type, error) {
 	var typ ast.Type
 
-	if p.curToken.Type == token.LBRACK {
-		pos := p.curToken.Start
-
-		if err := p.next(); err != nil {
-			return nil, err
-		}
-
+	pos := p.curToken.Start
+	consumed, err := p.consumeIfMatch(token.LBRACK)
+	if err != nil {
+		return nil, err
+	}
+	if consumed {
 		innerType, err := p.parseType()
 		if err != nil {
 			return nil, err
 		}
 
-		if err := p.expect(token.RBRACK); err != nil {
-			return nil, err
-		}
-		if err := p.next(); err != nil {
+		if _, err := p.expectAndAdvance(token.RBRACK); err != nil {
 			return nil, err
 		}
 
@@ -229,14 +248,8 @@ func (p *Parser) parseType() (ast.Type, error) {
 			Type:     innerType,
 		}
 	} else if p.curToken.Type == token.NAME {
-		typ = &ast.NamedType{
-			Position: p.curToken.Start,
-			Name: &ast.Name{
-				Position: p.curToken.Start,
-				Value:    p.curToken.Literal,
-			},
-		}
-		if err := p.next(); err != nil {
+		typ, err = p.parseNamedType()
+		if err != nil {
 			return nil, err
 		}
 	} else {
@@ -257,39 +270,33 @@ func (p *Parser) parseType() (ast.Type, error) {
 }
 
 func (p *Parser) parseAnonymousOperation() (*ast.OperationDefinition, error) {
-	if err := p.expect(token.LBRACE); err != nil {
-		return nil, err
-	}
-
 	op := &ast.OperationDefinition{
 		OperationType: ast.OperationTypeQuery,
 	}
+
 	ss, err := p.parseSelectionSet()
 	if err != nil {
 		return nil, err
 	}
 	op.SelectionSet = ss
+
 	return op, nil
 }
 
 func (p *Parser) parseFragmentDefinition() (*ast.FragmentDefinition, error) {
-	pos := p.curToken.Start
+	frag := &ast.FragmentDefinition{
+		Position: p.curToken.Start,
+	}
 
 	if err := p.next(); err != nil {
 		return nil, err
 	}
-	if err := p.expect(token.NAME); err != nil {
+
+	name, err := p.parseName()
+	if err != nil {
 		return nil, err
 	}
-	frag := &ast.FragmentDefinition{
-		Position: pos,
-		Name: &ast.Name{
-			Value: p.curToken.Literal,
-		},
-	}
-	if err := p.next(); err != nil {
-		return nil, err
-	}
+	frag.Name = name
 
 	if p.curToken.Literal != "on" {
 		return nil, fmt.Errorf("expected 'on', got %s", p.curToken.Literal)
@@ -298,17 +305,11 @@ func (p *Parser) parseFragmentDefinition() (*ast.FragmentDefinition, error) {
 		return nil, err
 	}
 
-	if err := p.expect(token.NAME); err != nil {
+	namedType, err := p.parseNamedType()
+	if err != nil {
 		return nil, err
 	}
-	frag.TypeCondition = &ast.NamedType{
-		Name: &ast.Name{
-			Value: p.curToken.Literal,
-		},
-	}
-	if err := p.next(); err != nil {
-		return nil, err
-	}
+	frag.TypeCondition = namedType
 
 	ss, err := p.parseSelectionSet()
 	if err != nil {
@@ -320,17 +321,12 @@ func (p *Parser) parseFragmentDefinition() (*ast.FragmentDefinition, error) {
 }
 
 func (p *Parser) parseSelectionSet() (*ast.SelectionSet, error) {
-	pos := p.curToken.Start
-
-	if err := p.expect(token.LBRACE); err != nil {
-		return nil, err
-	}
-	if err := p.next(); err != nil {
-		return nil, err
-	}
-
 	ss := &ast.SelectionSet{
-		Position: pos,
+		Position: p.curToken.Start,
+	}
+
+	if _, err := p.expectAndAdvance(token.LBRACE); err != nil {
+		return nil, err
 	}
 
 	for p.curToken.Type != token.RBRACE && p.curToken.Type != token.EOF {
@@ -341,10 +337,7 @@ func (p *Parser) parseSelectionSet() (*ast.SelectionSet, error) {
 		ss.Selections = append(ss.Selections, sel)
 	}
 
-	if err := p.expect(token.RBRACE); err != nil {
-		return nil, err
-	}
-	if err := p.next(); err != nil {
+	if _, err := p.expectAndAdvance(token.RBRACE); err != nil {
 		return nil, err
 	}
 
@@ -364,31 +357,22 @@ func (p *Parser) parseField() (ast.Selection, error) {
 	}
 
 	if p.curToken.Type == token.NAME && p.peekToken.Type == token.COLON {
-		field.Alias = &ast.Name{
-			Position: p.curToken.Start,
-			Value:    p.curToken.Literal,
-		}
-		if err := p.next(); err != nil {
+		alias, err := p.parseName()
+		if err != nil {
 			return nil, err
 		}
-		if err := p.expect(token.COLON); err != nil {
-			return nil, err
-		}
-		if err := p.next(); err != nil {
+		field.Alias = alias
+
+		if _, err := p.expectAndAdvance(token.COLON); err != nil {
 			return nil, err
 		}
 	}
 
-	if err := p.expect(token.NAME); err != nil {
+	name, err := p.parseName()
+	if err != nil {
 		return nil, err
 	}
-	field.Name = &ast.Name{
-		Position: p.curToken.Start,
-		Value:    p.curToken.Literal,
-	}
-	if err := p.next(); err != nil {
-		return nil, err
-	}
+	field.Name = name
 
 	if p.curToken.Type == token.LPAREN {
 		args, err := p.parseArguments()
@@ -455,20 +439,17 @@ func (p *Parser) parseInlineFragment() (*ast.InlineFragment, error) {
 	return inf, nil
 }
 
-func (p *Parser) parseNamedType() (nt *ast.NamedType, err error) {
-	if err := p.expect(token.NAME); err != nil {
-		return nil, err
-	}
-	nt = &ast.NamedType{
+func (p *Parser) parseNamedType() (*ast.NamedType, error) {
+	nt := &ast.NamedType{
 		Position: p.curToken.Start,
-		Name: &ast.Name{
-			Position: p.curToken.Start,
-			Value:    p.curToken.Literal,
-		},
 	}
-	if err := p.next(); err != nil {
+
+	name, err := p.parseName()
+	if err != nil {
 		return nil, err
 	}
+	nt.Name = name
+
 	return nt, nil
 }
 
@@ -487,28 +468,19 @@ func (p *Parser) parseDirectives() ([]*ast.Directive, error) {
 }
 
 func (p *Parser) parseDirective() (*ast.Directive, error) {
-	pos := p.curToken.Start
-
-	if err := p.expect(token.AT); err != nil {
-		return nil, err
-	}
-	if err := p.next(); err != nil {
-		return nil, err
-	}
-
-	if err := p.expect(token.NAME); err != nil {
-		return nil, err
-	}
 	dir := &ast.Directive{
-		Position: pos,
-		Name: &ast.Name{
-			Position: p.curToken.Start,
-			Value:    p.curToken.Literal,
-		},
+		Position: p.curToken.Start,
 	}
-	if err := p.next(); err != nil {
+
+	if _, err := p.expectAndAdvance(token.AT); err != nil {
 		return nil, err
 	}
+
+	name, err := p.parseName()
+	if err != nil {
+		return nil, err
+	}
+	dir.Name = name
 
 	if p.curToken.Type == token.LPAREN {
 		args, err := p.parseArguments()
@@ -524,10 +496,7 @@ func (p *Parser) parseDirective() (*ast.Directive, error) {
 func (p *Parser) parseArguments() ([]*ast.Argument, error) {
 	var args []*ast.Argument
 
-	if err := p.expect(token.LPAREN); err != nil {
-		return nil, err
-	}
-	if err := p.next(); err != nil {
+	if _, err := p.expectAndAdvance(token.LPAREN); err != nil {
 		return nil, err
 	}
 
@@ -539,10 +508,7 @@ func (p *Parser) parseArguments() ([]*ast.Argument, error) {
 		args = append(args, arg)
 	}
 
-	if err := p.expect(token.RPAREN); err != nil {
-		return nil, err
-	}
-	if err := p.next(); err != nil {
+	if _, err := p.expectAndAdvance(token.RPAREN); err != nil {
 		return nil, err
 	}
 
@@ -550,25 +516,17 @@ func (p *Parser) parseArguments() ([]*ast.Argument, error) {
 }
 
 func (p *Parser) parseArgument() (*ast.Argument, error) {
-	if err := p.expect(token.NAME); err != nil {
-		return nil, err
-	}
 	arg := &ast.Argument{
 		Position: p.curToken.Start,
-		Name: &ast.Name{
-			Position: p.curToken.Start,
-			Value:    p.curToken.Literal,
-		},
 	}
 
-	if err := p.next(); err != nil {
+	name, err := p.parseName()
+	if err != nil {
 		return nil, err
 	}
+	arg.Name = name
 
-	if err := p.expect(token.COLON); err != nil {
-		return nil, err
-	}
-	if err := p.next(); err != nil {
+	if _, err := p.expectAndAdvance(token.COLON); err != nil {
 		return nil, err
 	}
 
@@ -674,10 +632,7 @@ func (p *Parser) parseListValue() (ast.Value, error) {
 		Position: p.curToken.Start,
 	}
 
-	if err := p.expect(token.LBRACK); err != nil {
-		return nil, err
-	}
-	if err := p.next(); err != nil {
+	if _, err := p.expectAndAdvance(token.LBRACK); err != nil {
 		return nil, err
 	}
 
@@ -689,10 +644,7 @@ func (p *Parser) parseListValue() (ast.Value, error) {
 		list.Values = append(list.Values, val)
 	}
 
-	if err := p.expect(token.RBRACK); err != nil {
-		return nil, err
-	}
-	if err := p.next(); err != nil {
+	if _, err := p.expectAndAdvance(token.RBRACK); err != nil {
 		return nil, err
 	}
 
@@ -704,10 +656,7 @@ func (p *Parser) parseObjectValue() (ast.Value, error) {
 		Position: p.curToken.Start,
 	}
 
-	if err := p.expect(token.LBRACE); err != nil {
-		return nil, err
-	}
-	if err := p.next(); err != nil {
+	if _, err := p.expectAndAdvance(token.LBRACE); err != nil {
 		return nil, err
 	}
 
@@ -719,10 +668,7 @@ func (p *Parser) parseObjectValue() (ast.Value, error) {
 		obj.Fields = append(obj.Fields, field)
 	}
 
-	if err := p.expect(token.RBRACE); err != nil {
-		return nil, err
-	}
-	if err := p.next(); err != nil {
+	if _, err := p.expectAndAdvance(token.RBRACE); err != nil {
 		return nil, err
 	}
 
@@ -730,25 +676,17 @@ func (p *Parser) parseObjectValue() (ast.Value, error) {
 }
 
 func (p *Parser) parseObjectField() (*ast.ObjectField, error) {
-	if err := p.expect(token.NAME); err != nil {
-		return nil, err
-	}
 	of := &ast.ObjectField{
 		Position: p.curToken.Start,
-		Name: &ast.Name{
-			Position: p.curToken.Start,
-			Value:    p.curToken.Literal,
-		},
 	}
 
-	if err := p.next(); err != nil {
+	name, err := p.parseName()
+	if err != nil {
 		return nil, err
 	}
+	of.Name = name
 
-	if err := p.expect(token.COLON); err != nil {
-		return nil, err
-	}
-	if err := p.next(); err != nil {
+	if _, err := p.expectAndAdvance(token.COLON); err != nil {
 		return nil, err
 	}
 
@@ -762,47 +700,33 @@ func (p *Parser) parseObjectField() (*ast.ObjectField, error) {
 }
 
 func (p *Parser) parseVariable() (ast.Value, error) {
-	pos := p.curToken.Start
-
-	if err := p.expect(token.DOLLAR); err != nil {
-		return nil, err
-	}
-	if err := p.next(); err != nil {
-		return nil, err
-	}
-	if err := p.expect(token.NAME); err != nil {
-		return nil, err
-	}
-
 	variable := &ast.Variable{
-		Position: pos,
-		Name: &ast.Name{
-			Position: p.curToken.Start,
-			Value:    p.curToken.Literal,
-		},
+		Position: p.curToken.Start,
 	}
-	if err := p.next(); err != nil {
+
+	if _, err := p.expectAndAdvance(token.DOLLAR); err != nil {
 		return nil, err
 	}
+
+	name, err := p.parseName()
+	if err != nil {
+		return nil, err
+	}
+	variable.Name = name
 
 	return variable, nil
 }
 
 func (p *Parser) parseFragmentSpread() (*ast.FragmentSpread, error) {
-	if err := p.expect(token.NAME); err != nil {
-		return nil, err
-	}
 	fs := &ast.FragmentSpread{
 		Position: p.curToken.Start,
-		Name: &ast.Name{
-			Position: p.curToken.Start,
-			Value:    p.curToken.Literal,
-		},
 	}
 
-	if err := p.next(); err != nil {
+	name, err := p.parseName()
+	if err != nil {
 		return nil, err
 	}
+	fs.Name = name
 
 	directives, err := p.parseDirectives()
 	if err != nil {
