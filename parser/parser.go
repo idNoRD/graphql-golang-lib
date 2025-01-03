@@ -377,7 +377,7 @@ func (p *Parser) parseField() (ast.Selection, error) {
 	if p.curToken.Type == token.LPAREN {
 		args, err := p.parseArguments()
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse arguments: %w", err)
+			return nil, err
 		}
 		field.Arguments = args
 	}
