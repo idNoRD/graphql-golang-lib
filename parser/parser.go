@@ -69,16 +69,6 @@ func (p *Parser) expectAndAdvance(tokType token.Type) (token.Token, error) {
 	return tok, nil
 }
 
-func (p *Parser) consumeIfMatch(tokType token.Type) (bool, error) {
-	if p.curToken.Type != tokType {
-		return false, nil
-	}
-	if err := p.next(); err != nil {
-		return true, err
-	}
-	return true, nil
-}
-
 func (p *Parser) parseDefinition() (ast.Definition, error) {
 	if p.peekToken.Type == token.LBRACE {
 		if err := p.next(); err != nil {
@@ -227,13 +217,13 @@ func (p *Parser) parseVariableDefinition() (*ast.VariableDefinition, error) {
 
 func (p *Parser) parseType() (ast.Type, error) {
 	var typ ast.Type
-
 	pos := p.curToken.Start
-	consumed, err := p.consumeIfMatch(token.LBRACK)
-	if err != nil {
-		return nil, err
-	}
-	if consumed {
+
+	if p.curToken.Type == token.LBRACK {
+		if err := p.next(); err != nil {
+			return nil, err
+		}
+
 		innerType, err := p.parseType()
 		if err != nil {
 			return nil, err
@@ -248,6 +238,7 @@ func (p *Parser) parseType() (ast.Type, error) {
 			Type:     innerType,
 		}
 	} else if p.curToken.Type == token.NAME {
+		var err error
 		typ, err = p.parseNamedType()
 		if err != nil {
 			return nil, err
