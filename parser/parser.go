@@ -234,10 +234,7 @@ func (p *Parser) parseType() (ast.Type, error) {
 			return nil, err
 		}
 
-		if err := p.expect(token.RBRACK); err != nil {
-			return nil, err
-		}
-		if err := p.next(); err != nil {
+		if err := p.expectAndAdvance(token.RBRACK); err != nil {
 			return nil, err
 		}
 
