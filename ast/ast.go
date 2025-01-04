@@ -99,7 +99,7 @@ func (r *RootOperationTypeDefinition) End() int { return -1 }
 // https://spec.graphql.org/draft/#ScalarTypeExtension
 type ScalarTypeExtension struct {
 	Position   int
-	Name       Name
+	Name       *Name
 	Directives []*Directive
 }
 
@@ -113,10 +113,10 @@ func (s *ScalarTypeExtension) typeSystemExtensionNode() {}
 // https://spec.graphql.org/draft/#ObjectTypeExtension
 type ObjectTypeExtension struct {
 	Position   int
-	Name       Name
-	Interfaces []*NamedType
+	Name       *Name
+	Interfaces ImplementsInterfaces
 	Directives []*Directive
-	Fields     []*FieldDefinition
+	Fields     FieldsDefinition
 }
 
 func (o *ObjectTypeExtension) Pos() int                 { return o.Position }
@@ -124,7 +124,76 @@ func (o *ObjectTypeExtension) End() int                 { return -1 }
 func (o *ObjectTypeExtension) definitionNode()          {}
 func (o *ObjectTypeExtension) typeSystemExtensionNode() {}
 
-// TODO: add additional interfaces: InterfaceTypeExtension, UnionTypeExtension...
+// ImplementsInterfaces
+//
+// https://spec.graphql.org/draft/#ImplementsInterfaces
+type ImplementsInterfaces []*NamedType
+
+// InterfaceTypeExtension
+//
+// https://spec.graphql.org/draft/#InterfaceTypeExtension
+type InterfaceTypeExtension struct {
+	Position   int
+	Name       *Name
+	Interfaces ImplementsInterfaces
+	Directives []*Directive
+	Fields     FieldsDefinition
+}
+
+func (i *InterfaceTypeExtension) Pos() int                 { return i.Position }
+func (i *InterfaceTypeExtension) End() int                 { return -1 }
+func (i *InterfaceTypeExtension) definitionNode()          {}
+func (i *InterfaceTypeExtension) typeSystemExtensionNode() {}
+
+// UnionTypeExtension
+//
+// https://spec.graphql.org/draft/#UnionTypeExtension
+type UnionTypeExtension struct {
+	Position   int
+	Name       *Name
+	Directives []*Directive
+	Types      UnionMemberTypes
+}
+
+func (u *UnionTypeExtension) Pos() int                 { return u.Position }
+func (u *UnionTypeExtension) End() int                 { return -1 }
+func (u *UnionTypeExtension) definitionNode()          {}
+func (u *UnionTypeExtension) typeSystemExtensionNode() {}
+
+// UnionMemberTypes
+//
+// https://spec.graphql.org/draft/#UnionMemberTypes
+type UnionMemberTypes []*NamedType
+
+// EnumTypeExtension
+//
+// https://spec.graphql.org/draft/#EnumTypeExtension
+type EnumTypeExtension struct {
+	Position   int
+	Name       *Name
+	Directives []*Directive
+	Values     EnumValuesDefinition
+}
+
+func (e *EnumTypeExtension) Pos() int                 { return e.Position }
+func (e *EnumTypeExtension) End() int                 { return -1 }
+func (e *EnumTypeExtension) definitionNode()          {}
+func (e *EnumTypeExtension) typeSystemExtensionNode() {}
+
+// InputObjectTypeExtension
+//
+// https://spec.graphql.org/draft/#InputObjectTypeExtension
+type InputObjectTypeExtension struct {
+	Position   int
+	Name       *Name
+	Directives []*Directive
+	Fields     InputFieldsDefinition
+}
+
+func (i *InputObjectTypeExtension) Pos() int                 { return i.Position }
+func (i *InputObjectTypeExtension) End() int                 { return -1 }
+func (i *InputObjectTypeExtension) definitionNode()          {}
+func (i *InputObjectTypeExtension) typeSystemExtensionNode() {}
 
 // FieldDefinition
 //
@@ -133,13 +202,23 @@ type FieldDefinition struct {
 	Position    int
 	Description *StringValue
 	Name        *Name
-	Arguments   []*InputValueDefinition
+	Arguments   ArgumentsDefinition
 	Type        Type
 	Directives  []*Directive
 }
 
 func (f *FieldDefinition) Pos() int { return f.Position }
 func (f *FieldDefinition) End() int { return -1 }
+
+// FieldsDefinition
+//
+// https://spec.graphql.org/draft/#FieldsDefinition
+type FieldsDefinition []*FieldDefinition
+
+// ArgumentsDefinition
+//
+// https://spec.graphql.org/draft/#ArgumentsDefinition
+type ArgumentsDefinition []*InputValueDefinition
 
 // InterfaceTypeDefinition
 //
@@ -203,6 +282,11 @@ type EnumValueDefinition struct {
 func (e *EnumValueDefinition) Pos() int { return e.Position }
 func (e *EnumValueDefinition) End() int { return -1 }
 
+// EnumValuesDefinition
+//
+// https://spec.graphql.org/draft/#EnumValuesDefinition
+type EnumValuesDefinition []*EnumValueDefinition
+
 // InputObjectTypeDefinition
 //
 // https://spec.graphql.org/draft/#InputObjectTypeDefinition
@@ -211,13 +295,18 @@ type InputObjectTypeDefinition struct {
 	Description *StringValue
 	Name        *Name
 	Directives  []*Directive
-	Fields      []*InputValueDefinition
+	Fields      InputFieldsDefinition
 }
 
 func (i *InputObjectTypeDefinition) Pos() int                  { return i.Position }
 func (i *InputObjectTypeDefinition) End() int                  { return -1 }
 func (i *InputObjectTypeDefinition) definitionNode()           {}
 func (i *InputObjectTypeDefinition) typeSystemDefinitionNode() {}
+
+// InputFieldsDefinition
+//
+// https://spec.graphql.org/draft/#InputFieldsDefinition
+type InputFieldsDefinition []*InputValueDefinition
 
 // InputValueDefinition
 //

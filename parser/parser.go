@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/gqlhub/gqlhub-core/ast"
 	"github.com/gqlhub/gqlhub-core/lexer"
@@ -45,22 +46,45 @@ func (p *Parser) ParseDocument() (*ast.Document, error) {
 	return doc, nil
 }
 
-func (p *Parser) next() (err error) {
+func (p *Parser) next() error {
 	p.curToken = p.peekToken
+	var err error
 	p.peekToken, err = p.l.NextToken()
-	return
+	return err
 }
 
-func (p *Parser) expect(tokType token.Type) error {
-	if p.curToken.Type != tokType {
-		return fmt.Errorf("expected %s, got %s", tokType, p.curToken.Type)
+func (p *Parser) expect(expectedToken token.Type) error {
+	if p.curToken.Type != expectedToken {
+		return fmt.Errorf("expected %s, got %s", expectedToken, p.curToken.Type)
 	}
 	return nil
 }
 
-func (p *Parser) expectAndAdvance(tokType token.Type) error {
-	if p.curToken.Type != tokType {
-		return fmt.Errorf("expected %s, got %s", tokType, p.curToken.Type)
+func (p *Parser) expectOneOf(expectedTokens ...token.Type) error {
+	for _, expected := range expectedTokens {
+		if p.curToken.Type == expected {
+			return nil
+		}
+	}
+
+	var expectedStrings []string
+	for _, tok := range expectedTokens {
+		expectedStrings = append(expectedStrings, tok.String())
+	}
+
+	return fmt.Errorf("expected one of [%s], got %s", strings.Join(expectedStrings, ", "), p.curToken.Type)
+}
+
+func (p *Parser) expectAndAdvance(expectedToken token.Type) error {
+	if p.curToken.Type != expectedToken {
+		return fmt.Errorf("expected %s, got %s", expectedToken, p.curToken.Type)
+	}
+	return p.next()
+}
+
+func (p *Parser) expectLiteralAndAdvance(lit string) error {
+	if p.curToken.Literal != lit {
+		return fmt.Errorf("expected %s, got %s", lit, p.curToken.Literal)
 	}
 	return p.next()
 }
@@ -77,6 +101,13 @@ func (p *Parser) parseDefinition() (ast.Definition, error) {
 		switch p.curToken.Literal {
 		case "query", "mutation", "subscription":
 			return p.parseOperationDefinition()
+
+		case "fragment":
+			return p.parseFragmentDefinition()
+
+		case "extend":
+			return p.parseTypeSystemExtension()
+
 		}
 	}
 
@@ -88,6 +119,7 @@ func (p *Parser) parseOperationType() (ast.OperationType, error) {
 		return "", err
 	}
 	opType := ast.OperationType(p.curToken.Literal)
+	// TODO: fmt.Errorf("unknown root operation type: %q", p.curToken.Literal)
 	if err := p.next(); err != nil {
 		return "", err
 	}
@@ -728,4 +760,608 @@ func (p *Parser) parseFragmentSpread() (*ast.FragmentSpread, error) {
 	fs.Directives = directives
 
 	return fs, nil
+}
+
+func (p *Parser) parseTypeSystemExtension() (ast.Definition, error) {
+	switch p.peekToken.Literal {
+	case "schema":
+		return p.parseSchemaExtension()
+	case "scalar":
+		return p.parseScalarTypeExtension()
+	case "type":
+		return p.parseObjectTypeExtension()
+	case "interface":
+		return p.parseInterfaceTypeExtension()
+	case "union":
+		return p.parseUnionTypeExtension()
+	case "enum":
+		return p.parseEnumTypeExtension()
+	case "input":
+		return p.parseInputObjectTypeExtension()
+	default:
+		return nil, fmt.Errorf("unexpected extension: %s", p.peekToken.Literal)
+	}
+}
+
+func (p *Parser) parseInputObjectTypeExtension() (ast.Definition, error) {
+	ext := &ast.InputObjectTypeExtension{
+		Position: p.curToken.Start,
+	}
+
+	if err := p.expectLiteralAndAdvance("extend"); err != nil {
+		return nil, err
+	}
+	if err := p.expectLiteralAndAdvance("input"); err != nil {
+		return nil, err
+	}
+
+	name, err := p.parseName()
+	if err != nil {
+		return nil, err
+	}
+	ext.Name = name
+
+	dirs, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+	ext.Directives = dirs
+
+	if p.curToken.Type == token.LBRACE {
+		fields, err := p.parseInputFieldsDefinition()
+		if err != nil {
+			return nil, err
+		}
+		ext.Fields = fields
+	}
+
+	return ext, nil
+}
+
+func (p *Parser) parseInputFieldsDefinition() (ast.InputFieldsDefinition, error) {
+	var fields ast.InputFieldsDefinition
+
+	if err := p.expectAndAdvance(token.LBRACE); err != nil {
+		return nil, err
+	}
+
+	for p.curToken.Type != token.RBRACE && p.curToken.Type != token.EOF {
+		f, err := p.parseInputValueDefinition()
+		if err != nil {
+			return nil, err
+		}
+		fields = append(fields, f)
+	}
+
+	if err := p.expectAndAdvance(token.RBRACE); err != nil {
+		return nil, err
+	}
+
+	return fields, nil
+}
+
+func (p *Parser) parseEnumTypeExtension() (ast.Definition, error) {
+	ext := &ast.EnumTypeExtension{
+		Position: p.curToken.Start,
+	}
+
+	if err := p.expectLiteralAndAdvance("extend"); err != nil {
+		return nil, err
+	}
+	if err := p.expectLiteralAndAdvance("enum"); err != nil {
+		return nil, err
+	}
+
+	name, err := p.parseName()
+	if err != nil {
+		return nil, err
+	}
+	ext.Name = name
+
+	dirs, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+	ext.Directives = dirs
+
+	if p.curToken.Type == token.LBRACE {
+		vals, err := p.parseEnumValuesDefinition()
+		if err != nil {
+			return nil, err
+		}
+		ext.Values = vals
+	}
+
+	return ext, nil
+}
+
+func (p *Parser) parseEnumValuesDefinition() (ast.EnumValuesDefinition, error) {
+	if err := p.expectAndAdvance(token.LBRACE); err != nil {
+		return nil, err
+	}
+
+	var vals ast.EnumValuesDefinition
+	for p.curToken.Type != token.RBRACE && p.curToken.Type != token.EOF {
+		ev, err := p.parseEnumValueDefinition()
+		if err != nil {
+			return nil, err
+		}
+		vals = append(vals, ev)
+	}
+
+	if err := p.expectAndAdvance(token.RBRACE); err != nil {
+		return nil, err
+	}
+
+	return vals, nil
+}
+
+func (p *Parser) parseEnumValueDefinition() (*ast.EnumValueDefinition, error) {
+	ev := &ast.EnumValueDefinition{
+		Position: p.curToken.Start,
+	}
+
+	if isDescription(p.curToken.Type) {
+		desc, err := p.parseDescription()
+		if err != nil {
+			return nil, err
+		}
+		ev.Description = desc
+	}
+
+	enumVal, err := p.parseEnumValueName()
+	if err != nil {
+		return nil, err
+	}
+	ev.Name = enumVal
+
+	directives, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+	ev.Directives = directives
+
+	return ev, nil
+}
+
+func (p *Parser) parseUnionTypeExtension() (ast.Definition, error) {
+	ext := &ast.UnionTypeExtension{
+		Position: p.curToken.Start,
+	}
+
+	if err := p.expectLiteralAndAdvance("extend"); err != nil {
+		return nil, err
+	}
+	if err := p.expectLiteralAndAdvance("union"); err != nil {
+		return nil, err
+	}
+
+	name, err := p.parseName()
+	if err != nil {
+		return nil, err
+	}
+	ext.Name = name
+
+	dirs, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+	ext.Directives = dirs
+
+	if p.curToken.Type == token.EQUALS {
+		types, err := p.parseUnionMemberTypes()
+		if err != nil {
+			return nil, err
+		}
+		ext.Types = types
+	}
+
+	if ext.Directives == nil && ext.Types == nil { // TODO: check length ?
+		return nil, fmt.Errorf("undexpected: %s", p.curToken.Literal) //TODO: fix msg see https://spec.graphql.org/draft/#UnionTypeDefinition
+	}
+
+	return ext, nil
+}
+
+func (p *Parser) parseEnumValueName() (*ast.Name, error) {
+	if err := p.expect(token.NAME); err != nil {
+		return nil, err
+	}
+	if p.curToken.Literal == "true" || p.curToken.Literal == "false" || p.curToken.Literal == "null" {
+		return nil, fmt.Errorf("undexpected: %s", p.curToken.Literal) // TODO: fix msg
+	}
+	return p.parseName()
+}
+
+func (p *Parser) parseUnionMemberTypes() (ast.UnionMemberTypes, error) {
+	if err := p.expectLiteralAndAdvance("implements"); err != nil {
+		return nil, err
+	}
+	var types ast.UnionMemberTypes
+	for {
+		nt, err := p.parseNamedType()
+		if err != nil {
+			return nil, err
+		}
+		types = append(types, nt)
+		if p.curToken.Type == token.PIPE {
+			if err := p.next(); err != nil {
+				return nil, err
+			}
+			continue
+		}
+		break
+	}
+	return types, nil
+}
+
+func (p *Parser) parseInterfaceTypeExtension() (ast.Definition, error) {
+	ext := &ast.InterfaceTypeExtension{
+		Position: p.curToken.Start,
+	}
+
+	if err := p.expectLiteralAndAdvance("extend"); err != nil {
+		return nil, err
+	}
+	if err := p.expectLiteralAndAdvance("interface"); err != nil {
+		return nil, err
+	}
+
+	name, err := p.parseName()
+	if err != nil {
+		return nil, err
+	}
+	ext.Name = name
+
+	if p.curToken.Literal == "implements" {
+		ii, err := p.parseImplementsInterfaces()
+		if err != nil {
+			return nil, err
+		}
+		ext.Interfaces = ii
+	}
+
+	dirs, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+	ext.Directives = dirs
+
+	if p.curToken.Type == token.LBRACE {
+		fields, err := p.parseFieldsDefinition()
+		if err != nil {
+			return nil, err
+		}
+		ext.Fields = fields
+	}
+
+	if ext.Interfaces == nil && ext.Directives == nil && ext.Fields == nil {
+		return nil, fmt.Errorf("undexpected: %s", p.curToken.Literal) //TODO: fix msg see https://spec.graphql.org/draft/#InterfaceTypeExtension
+	}
+
+	return ext, nil
+}
+
+func (p *Parser) parseSchemaExtension() (*ast.SchemaExtension, error) {
+	se := &ast.SchemaExtension{
+		Position: p.curToken.Start,
+	}
+
+	if err := p.expectLiteralAndAdvance("extend"); err != nil {
+		return nil, err
+	}
+	if err := p.expectLiteralAndAdvance("schema"); err != nil {
+		return nil, err
+	}
+
+	directives, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+	se.Directives = directives
+
+	if err := p.expectAndAdvance(token.LBRACE); err != nil {
+		return nil, err
+	}
+
+	var roots []*ast.RootOperationTypeDefinition
+	for p.curToken.Type != token.RBRACE && p.curToken.Type != token.EOF {
+		root, err := p.parseRootOperationTypeDefinition()
+		if err != nil {
+			return nil, err
+		}
+		roots = append(roots, root)
+	}
+	se.RootOperationDefs = roots
+
+	if err := p.expectAndAdvance(token.RBRACE); err != nil {
+		return nil, err
+	}
+
+	return se, nil
+}
+
+func (p *Parser) parseRootOperationTypeDefinition() (*ast.RootOperationTypeDefinition, error) {
+	root := &ast.RootOperationTypeDefinition{
+		Position: p.curToken.Start,
+	}
+
+	opType, err := p.parseOperationType()
+	if err != nil {
+		return nil, err
+	}
+	root.OperationType = opType
+
+	if err := p.expectAndAdvance(token.COLON); err != nil {
+		return nil, err
+	}
+
+	nt, err := p.parseNamedType()
+	if err != nil {
+		return nil, err
+	}
+	root.Type = nt
+
+	return root, nil
+}
+
+func (p *Parser) parseScalarTypeExtension() (*ast.ScalarTypeExtension, error) {
+	ext := &ast.ScalarTypeExtension{
+		Position: p.curToken.Start,
+	}
+
+	if err := p.expectLiteralAndAdvance("extend"); err != nil {
+		return nil, err
+	}
+	if err := p.expectLiteralAndAdvance("scalar"); err != nil {
+		return nil, err
+	}
+
+	name, err := p.parseName()
+	if err != nil {
+		return nil, err
+	}
+	ext.Name = name
+
+	dir, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+	if len(dir) == 0 { // TODO: Find out if we need this
+		return nil, fmt.Errorf("directives required")
+	}
+	ext.Directives = dir
+
+	return ext, nil
+}
+
+func (p *Parser) parseObjectTypeExtension() (*ast.ObjectTypeExtension, error) {
+	ext := &ast.ObjectTypeExtension{
+		Position: p.curToken.Start,
+	}
+
+	if err := p.expectLiteralAndAdvance("extend"); err != nil {
+		return nil, err
+	}
+	if err := p.expectLiteralAndAdvance("type"); err != nil {
+		return nil, err
+	}
+
+	name, err := p.parseName()
+	if err != nil {
+		return nil, err
+	}
+	ext.Name = name
+
+	if p.curToken.Literal == "implements" {
+		ii, err := p.parseImplementsInterfaces()
+		if err != nil {
+			return nil, err
+		}
+		ext.Interfaces = ii
+	}
+
+	dir, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+	ext.Directives = dir
+
+	if p.curToken.Type == token.LBRACE {
+		fields, err := p.parseFieldsDefinition()
+		if err != nil {
+			return nil, err
+		}
+		ext.Fields = fields
+	}
+
+	return ext, nil
+}
+
+func (p *Parser) parseImplementsInterfaces() (ast.ImplementsInterfaces, error) {
+	if err := p.expectLiteralAndAdvance("implements"); err != nil {
+		return nil, err
+	}
+	var interfaces ast.ImplementsInterfaces
+	for {
+		nt, err := p.parseNamedType()
+		if err != nil {
+			return nil, err
+		}
+		interfaces = append(interfaces, nt)
+		if p.curToken.Type == token.AMP {
+			if err := p.next(); err != nil {
+				return nil, err
+			}
+			continue
+		}
+		break
+	}
+	return interfaces, nil
+}
+
+func (p *Parser) parseFieldsDefinition() (ast.FieldsDefinition, error) {
+	var fields ast.FieldsDefinition
+
+	if err := p.expectAndAdvance(token.LBRACE); err != nil {
+		return nil, err
+	}
+
+	for p.curToken.Type != token.RBRACE && p.curToken.Type != token.EOF {
+		f, err := p.parseFieldDefinition()
+		if err != nil {
+			return nil, err
+		}
+		fields = append(fields, f)
+	}
+
+	if err := p.expectAndAdvance(token.RBRACE); err != nil {
+		return nil, err
+	}
+
+	return fields, nil
+}
+
+func (p *Parser) parseFieldDefinition() (*ast.FieldDefinition, error) {
+	f := &ast.FieldDefinition{
+		Position: p.curToken.Start,
+	}
+
+	if isDescription(p.curToken.Type) {
+		desc, err := p.parseDescription()
+		if err != nil {
+			return nil, err
+		}
+		f.Description = desc
+	}
+
+	name, err := p.parseName()
+	if err != nil {
+		return nil, err
+	}
+	f.Name = name
+
+	var args ast.ArgumentsDefinition
+	if p.curToken.Type == token.LPAREN {
+		args, err = p.parseArgumentsDefinition()
+		if err != nil {
+			return nil, err
+		}
+	}
+	f.Arguments = args
+
+	if err := p.expectAndAdvance(token.COLON); err != nil {
+		return nil, err
+	}
+
+	typ, err := p.parseType()
+	if err != nil {
+		return nil, err
+	}
+	f.Type = typ
+
+	directives, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+	f.Directives = directives
+
+	return f, nil
+}
+
+func (p *Parser) parseArgumentsDefinition() (ast.ArgumentsDefinition, error) {
+	var defs ast.ArgumentsDefinition
+
+	if err := p.expectAndAdvance(token.LPAREN); err != nil {
+		return nil, err
+	}
+
+	for p.curToken.Type != token.RPAREN && p.curToken.Type != token.EOF {
+		def, err := p.parseInputValueDefinition()
+		if err != nil {
+			return nil, err
+		}
+		defs = append(defs, def)
+	}
+
+	if err := p.expectAndAdvance(token.RPAREN); err != nil {
+		return nil, err
+	}
+
+	return defs, nil
+}
+
+func (p *Parser) parseInputValueDefinition() (*ast.InputValueDefinition, error) {
+	ivd := &ast.InputValueDefinition{
+		Position: p.curToken.Start,
+	}
+
+	if isDescription(p.curToken.Type) {
+		desc, err := p.parseDescription()
+		if err != nil {
+			return nil, err
+		}
+		ivd.Description = desc
+	}
+
+	name, err := p.parseName()
+	if err != nil {
+		return nil, err
+	}
+	ivd.Name = name
+
+	if err := p.expectAndAdvance(token.COLON); err != nil {
+		return nil, err
+	}
+
+	typ, err := p.parseType()
+	if err != nil {
+		return nil, err
+	}
+	ivd.Type = typ
+
+	if p.curToken.Type == token.EQUALS {
+		if err := p.next(); err != nil {
+			return nil, err
+		}
+		val, err := p.parseValue()
+		if err != nil {
+			return nil, err
+		}
+		ivd.DefaultValue = val
+	}
+
+	directives, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+	ivd.Directives = directives
+
+	return ivd, nil
+}
+
+func (p *Parser) parseDescription() (*ast.StringValue, error) {
+	val, err := p.parseStringValue()
+	if err != nil {
+		return nil, err
+	}
+	return val, nil
+}
+
+func (p *Parser) parseStringValue() (*ast.StringValue, error) {
+	sv := &ast.StringValue{
+		Position: p.curToken.Start,
+	}
+
+	if err := p.expectOneOf(token.STRING, token.BLOCK_STRING); err != nil {
+		return nil, err
+	}
+	if err := p.next(); err != nil {
+		return nil, err
+	}
+
+	sv.Value = p.curToken.Literal
+	sv.Block = p.curToken.Type == token.BLOCK_STRING
+
+	return sv, nil
 }
