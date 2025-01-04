@@ -177,7 +177,7 @@ type InputObjectTypeExtension struct {
 	Position   int
 	Name       *Name
 	Directives []*Directive
-	Fields     InputFieldsDefinition
+	Fields     []*InputValueDefinition
 }
 
 func (i *InputObjectTypeExtension) Pos() int                 { return i.Position }
@@ -270,18 +270,13 @@ type InputObjectTypeDefinition struct {
 	Description *StringValue
 	Name        *Name
 	Directives  []*Directive
-	Fields      InputFieldsDefinition
+	Fields      []*InputValueDefinition
 }
 
 func (i *InputObjectTypeDefinition) Pos() int                  { return i.Position }
 func (i *InputObjectTypeDefinition) End() int                  { return -1 }
 func (i *InputObjectTypeDefinition) definitionNode()           {}
 func (i *InputObjectTypeDefinition) typeSystemDefinitionNode() {}
-
-// InputFieldsDefinition
-//
-// https://spec.graphql.org/draft/#InputFieldsDefinition
-type InputFieldsDefinition []*InputValueDefinition
 
 // InputValueDefinition
 //

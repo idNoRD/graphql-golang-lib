@@ -1192,8 +1192,8 @@ func (p *Parser) parseInputObjectTypeExtension() (ast.Definition, error) {
 	return ext, nil
 }
 
-func (p *Parser) parseInputFieldsDefinition() (ast.InputFieldsDefinition, error) {
-	var fields ast.InputFieldsDefinition
+func (p *Parser) parseInputFieldsDefinition() ([]*ast.InputValueDefinition, error) {
+	var fields []*ast.InputValueDefinition
 
 	if err := p.expectAndAdvance(token.LBRACE); err != nil {
 		return nil, err
