@@ -1336,7 +1336,7 @@ func (p *Parser) parseUnionTypeExtension() (ast.Definition, error) {
 	}
 
 	if ext.Directives == nil && ext.Types == nil { // TODO: check length ?
-		return nil, fmt.Errorf("undexpected: %s", p.curToken.Literal) //TODO: fix msg see https://spec.graphql.org/draft/#UnionTypeDefinition
+		return nil, fmt.Errorf("unexpected: %s", p.curToken.Literal) //TODO: fix msg see https://spec.graphql.org/draft/#UnionTypeDefinition
 	}
 
 	return ext, nil
@@ -1347,7 +1347,7 @@ func (p *Parser) parseEnumValueName() (*ast.Name, error) {
 		return nil, err
 	}
 	if p.curToken.Literal == "true" || p.curToken.Literal == "false" || p.curToken.Literal == "null" {
-		return nil, fmt.Errorf("undexpected: %s", p.curToken.Literal) // TODO: fix msg
+		return nil, fmt.Errorf("unexpected: %s", p.curToken.Literal) // TODO: fix msg
 	}
 	return p.parseName()
 }
@@ -1415,7 +1415,7 @@ func (p *Parser) parseInterfaceTypeExtension() (ast.Definition, error) {
 	}
 
 	if ext.Interfaces == nil && ext.Directives == nil && ext.Fields == nil {
-		return nil, fmt.Errorf("undexpected: %s", p.curToken.Literal) //TODO: fix msg see https://spec.graphql.org/draft/#InterfaceTypeExtension
+		return nil, fmt.Errorf("unexpected: %s", p.curToken.Literal) //TODO: fix msg see https://spec.graphql.org/draft/#InterfaceTypeExtension
 	}
 
 	return ext, nil
