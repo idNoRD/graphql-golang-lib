@@ -99,15 +99,31 @@ func (p *Parser) parseDefinition() (ast.Definition, error) {
 
 	if p.peekToken.Type == token.NAME {
 		switch p.curToken.Literal {
+		case "schema":
+			return p.parseSchemaDefinition()
+		case "scalar":
+			return p.parseScalarTypeDefinition()
+		case "type":
+			return p.parseObjectTypeDefinition()
+		case "interface":
+			return p.parseInterfaceTypeDefinition()
+		case "union":
+			return p.parseUnionTypeDefinition()
+		case "enum":
+			return p.parseEnumTypeDefinition()
+		case "input":
+			return p.parseInputObjectTypeDefinition()
+		case "directive":
+			return p.parseDirectiveDefinition()
+		}
+
+		switch p.curToken.Literal {
 		case "query", "mutation", "subscription":
 			return p.parseOperationDefinition()
-
 		case "fragment":
 			return p.parseFragmentDefinition()
-
 		case "extend":
 			return p.parseTypeSystemExtension()
-
 		}
 	}
 
@@ -763,12 +779,12 @@ func (p *Parser) parseFragmentSpread() (*ast.FragmentSpread, error) {
 }
 
 /*
-TypeSystemExtension:
+TypeSystemExtension: https://spec.graphql.org/draft/#TypeSystemExtension
 
 	SchemaExtension
 	TypeExtension
 
-TypeExtension:
+TypeExtension: https://spec.graphql.org/draft/#TypeExtension
 
 	ScalarTypeExtension
 	ObjectTypeExtension
@@ -1364,19 +1380,19 @@ func (p *Parser) parseDescription() (*ast.StringValue, error) {
 }
 
 func (p *Parser) parseStringValue() (*ast.StringValue, error) {
-	sv := &ast.StringValue{
-		Position: p.curToken.Start,
-	}
-
 	if err := p.expectOneOf(token.STRING, token.BLOCK_STRING); err != nil {
 		return nil, err
 	}
+
+	sv := &ast.StringValue{
+		Position: p.curToken.Start,
+		Value:    p.curToken.Literal,
+		Block:    p.curToken.Type == token.BLOCK_STRING,
+	}
+
 	if err := p.next(); err != nil {
 		return nil, err
 	}
-
-	sv.Value = p.curToken.Literal
-	sv.Block = p.curToken.Type == token.BLOCK_STRING
 
 	return sv, nil
 }
