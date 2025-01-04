@@ -968,22 +968,9 @@ func (p *Parser) parseValue() (ast.Value, error) {
 			return nil, err
 		}
 		return val, nil
-	case token.STRING_VALUE:
-		val := &ast.StringValue{
-			Position: p.curToken.Start,
-			Value:    p.curToken.Literal,
-			Block:    false,
-		}
-		if err := p.next(); err != nil {
-			return nil, err
-		}
-		return val, nil
-	//case token.STRING_VALUE:
-	//	val := &ast.StringValue{Value: p.curToken.Literal, Block: true}
-	//	if err := p.next(); err != nil {
-	//		return val, err
-	//	}
-	//	return val, nil
+	case token.STRING:
+	case token.BLOCK_STRING:
+		return p.parseStringValue()
 	case token.NAME:
 		switch p.curToken.Literal {
 		case "true":
@@ -1024,13 +1011,10 @@ func (p *Parser) parseValue() (ast.Value, error) {
 		}
 	case token.DOLLAR:
 		return p.parseVariable()
-
 	case token.LBRACK:
 		return p.parseListValue()
-
 	case token.LBRACE:
 		return p.parseObjectValue()
-
 	default:
 		return nil, fmt.Errorf("unexpected value token: %s", p.curToken.Type)
 	}
