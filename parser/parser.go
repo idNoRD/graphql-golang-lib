@@ -88,7 +88,7 @@ func (p *Parser) parseDefinition() (ast.Definition, error) {
 		if err := p.next(); err != nil {
 			return nil, err
 		}
-		return p.parseAnonymousOperation()
+		return p.parseAnonymousOperationDefinition()
 	}
 
 	var tok token.Token
@@ -673,7 +673,7 @@ func (p *Parser) parseType() (ast.Type, error) {
 	return typ, nil
 }
 
-func (p *Parser) parseAnonymousOperation() (*ast.OperationDefinition, error) {
+func (p *Parser) parseAnonymousOperationDefinition() (*ast.OperationDefinition, error) {
 	op := &ast.OperationDefinition{
 		OperationType: ast.OperationTypeQuery,
 	}
