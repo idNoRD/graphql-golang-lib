@@ -141,13 +141,14 @@ func (l *Lexer) NextToken() (tok token.Token, err error) {
 			tok.Type = token.RBRACE
 			l.readChar()
 		case '"':
-			tok.Type = token.STRING_VALUE
 			if l.peekChar() == '"' && l.peekCharAt(1) == '"' {
+				tok.Type = token.BLOCK_STRING
 				tok.Literal, err = l.readBlockString()
 				if err != nil {
 					return
 				}
 			} else {
+				tok.Type = token.STRING
 				tok.Literal, err = l.readString()
 				if err != nil {
 					return

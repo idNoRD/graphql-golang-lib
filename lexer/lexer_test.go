@@ -207,32 +207,32 @@ func TestNextToken_ValidStrings(t *testing.T) {
 		input         string
 		expectedToken token.Token
 	}{
-		{"Empty", `""`, token.Token{Type: token.STRING_VALUE, Literal: "", Start: 0, End: 2}},
-		{"Simple", `"hello"`, token.Token{Type: token.STRING_VALUE, Literal: "hello", Start: 0, End: 7}},
-		{"Surrounded by whitespace", `" hello world "`, token.Token{Type: token.STRING_VALUE, Literal: " hello world ", Start: 0, End: 15}},
+		{"Empty", `""`, token.Token{Type: token.STRING, Literal: "", Start: 0, End: 2}},
+		{"Simple", `"hello"`, token.Token{Type: token.STRING, Literal: "hello", Start: 0, End: 7}},
+		{"Surrounded by whitespace", `" hello world "`, token.Token{Type: token.STRING, Literal: " hello world ", Start: 0, End: 15}},
 
 		// Escaped Characters
-		{"Escaped quote", `"hello \""`, token.Token{Type: token.STRING_VALUE, Literal: `hello "`, Start: 0, End: 10}},
-		{"Escaped slashes", `"hello \\ \\\\ \/"`, token.Token{Type: token.STRING_VALUE, Literal: `hello \ \\ /`, Start: 0, End: 18}},
-		{"Escaped control characters", `"hello \b\f\n\r\t"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \b\f\n\r\t", Start: 0, End: 18}},
+		{"Escaped quote", `"hello \""`, token.Token{Type: token.STRING, Literal: `hello "`, Start: 0, End: 10}},
+		{"Escaped slashes", `"hello \\ \\\\ \/"`, token.Token{Type: token.STRING, Literal: `hello \ \\ /`, Start: 0, End: 18}},
+		{"Escaped control characters", `"hello \b\f\n\r\t"`, token.Token{Type: token.STRING, Literal: "hello \b\f\n\r\t", Start: 0, End: 18}},
 
 		// Unicode in BMP
-		{"Fixed-width escaped Unicode sequences", `"hello \u0123\u4567\u89AB\uCDEF"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \u0123\u4567\u89AB\uCDEF", Start: 0, End: 32}},
-		{"Variable-width escaped Unicode sequences", `"hello \u{0123}\u{4567}\u{89AB}\u{CDEF}"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \u0123\u4567\u89AB\uCDEF", Start: 0, End: 40}},
-		{"Fixed-width escaped Unicode with minimum width", `"hello \u0000"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \u0000", Start: 0, End: 14}},
-		{"Variable-width escaped Unicode with minimum width", `"hello \u{0}"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \u0000", Start: 0, End: 13}},
-		{"Zero-padded escaped Unicode with full width", `"hello \u{00000000}"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \u0000", Start: 0, End: 20}},
+		{"Fixed-width escaped Unicode sequences", `"hello \u0123\u4567\u89AB\uCDEF"`, token.Token{Type: token.STRING, Literal: "hello \u0123\u4567\u89AB\uCDEF", Start: 0, End: 32}},
+		{"Variable-width escaped Unicode sequences", `"hello \u{0123}\u{4567}\u{89AB}\u{CDEF}"`, token.Token{Type: token.STRING, Literal: "hello \u0123\u4567\u89AB\uCDEF", Start: 0, End: 40}},
+		{"Fixed-width escaped Unicode with minimum width", `"hello \u0000"`, token.Token{Type: token.STRING, Literal: "hello \u0000", Start: 0, End: 14}},
+		{"Variable-width escaped Unicode with minimum width", `"hello \u{0}"`, token.Token{Type: token.STRING, Literal: "hello \u0000", Start: 0, End: 13}},
+		{"Zero-padded escaped Unicode with full width", `"hello \u{00000000}"`, token.Token{Type: token.STRING, Literal: "hello \u0000", Start: 0, End: 20}},
 
 		// Unicode beyond BMP
-		{"Unescaped Unicode beyond BMP", `"hello 🫶"`, token.Token{Type: token.STRING_VALUE, Literal: "hello 🫶", Start: 0, End: 12}},
-		{"Escaped Unicode beyond BMP", `"hello \u{1F60E}"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \U0001F60E", Start: 0, End: 17}},
-		{"Maximum unescaped Unicode beyond BMP", "\"hello \U0010FFFF\"", token.Token{Type: token.STRING_VALUE, Literal: "hello \U0010FFFF", Start: 0, End: 12}},
-		{"Maximum escaped Unicode", `"hello \u{10FFFF}"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \U0010FFFF", Start: 0, End: 18}},
+		{"Unescaped Unicode beyond BMP", `"hello 🫶"`, token.Token{Type: token.STRING, Literal: "hello 🫶", Start: 0, End: 12}},
+		{"Escaped Unicode beyond BMP", `"hello \u{1F60E}"`, token.Token{Type: token.STRING, Literal: "hello \U0001F60E", Start: 0, End: 17}},
+		{"Maximum unescaped Unicode beyond BMP", "\"hello \U0010FFFF\"", token.Token{Type: token.STRING, Literal: "hello \U0010FFFF", Start: 0, End: 12}},
+		{"Maximum escaped Unicode", `"hello \u{10FFFF}"`, token.Token{Type: token.STRING, Literal: "hello \U0010FFFF", Start: 0, End: 18}},
 
 		// Surrogate Pairs
-		{"Surrogate pair (heart emoji)", `"hello \uD83C\uDF0D"`, token.Token{Type: token.STRING_VALUE, Literal: "hello 🌍", Start: 0, End: 20}},
-		{"Minimum surrogate pair", `"hello \uD800\uDC00"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \U00010000", Start: 0, End: 20}},
-		{"Maximum surrogate pair", `"hello \uDBFF\uDFFF"`, token.Token{Type: token.STRING_VALUE, Literal: "hello \U0010FFFF", Start: 0, End: 20}},
+		{"Surrogate pair (heart emoji)", `"hello \uD83C\uDF0D"`, token.Token{Type: token.STRING, Literal: "hello 🌍", Start: 0, End: 20}},
+		{"Minimum surrogate pair", `"hello \uD800\uDC00"`, token.Token{Type: token.STRING, Literal: "hello \U00010000", Start: 0, End: 20}},
+		{"Maximum surrogate pair", `"hello \uDBFF\uDFFF"`, token.Token{Type: token.STRING, Literal: "hello \U0010FFFF", Start: 0, End: 20}},
 	})
 }
 
@@ -280,23 +280,23 @@ func TestNextToken_ValidBlockStrings(t *testing.T) {
 		input         string
 		expectedToken token.Token
 	}{
-		{"Empty", `""""""`, token.Token{Type: token.STRING_VALUE, Literal: ``, Start: 0, End: 6}},
-		{"Simple", `"""hello"""`, token.Token{Type: token.STRING_VALUE, Literal: `hello`, Start: 0, End: 11}},
-		{"Surrounded by whitespace", `""" hello world """`, token.Token{Type: token.STRING_VALUE, Literal: ` hello world `, Start: 0, End: 19}},
-		{"Quote", `"""hello " world"""`, token.Token{Type: token.STRING_VALUE, Literal: `hello " world`, Start: 0, End: 19}},
-		{"Triple quotes", `"""hello \""" world"""`, token.Token{Type: token.STRING_VALUE, Literal: `hello """ world`, Start: 0, End: 22}},
-		{"Newlines", "\"\"\"hello\nworld\"\"\"", token.Token{Type: token.STRING_VALUE, Literal: "hello\nworld", Start: 0, End: 17}},
-		{"Normalized newlines", "\"\"\"foo\rbar\r\nbaz\"\"\"", token.Token{Type: token.STRING_VALUE, Literal: "foo\nbar\nbaz", Start: 0, End: 18}},
-		{"Slashes", `"""hello \ /"""`, token.Token{Type: token.STRING_VALUE, Literal: `hello \ /`, Start: 0, End: 15}},
-		{"Unescaped control characters", `"""hello \b\f\n\r\t"""`, token.Token{Type: token.STRING_VALUE, Literal: `hello \b\f\n\r\t`, Start: 0, End: 22}},
-		{"Unescaped Unicode", `"""hello 🫶"""`, token.Token{Type: token.STRING_VALUE, Literal: "hello 🫶", Start: 0, End: 16}},
+		{"Empty", `""""""`, token.Token{Type: token.BLOCK_STRING, Literal: ``, Start: 0, End: 6}},
+		{"Simple", `"""hello"""`, token.Token{Type: token.BLOCK_STRING, Literal: `hello`, Start: 0, End: 11}},
+		{"Surrounded by whitespace", `""" hello world """`, token.Token{Type: token.BLOCK_STRING, Literal: ` hello world `, Start: 0, End: 19}},
+		{"Quote", `"""hello " world"""`, token.Token{Type: token.BLOCK_STRING, Literal: `hello " world`, Start: 0, End: 19}},
+		{"Triple quotes", `"""hello \""" world"""`, token.Token{Type: token.BLOCK_STRING, Literal: `hello """ world`, Start: 0, End: 22}},
+		{"Newlines", "\"\"\"hello\nworld\"\"\"", token.Token{Type: token.BLOCK_STRING, Literal: "hello\nworld", Start: 0, End: 17}},
+		{"Normalized newlines", "\"\"\"foo\rbar\r\nbaz\"\"\"", token.Token{Type: token.BLOCK_STRING, Literal: "foo\nbar\nbaz", Start: 0, End: 18}},
+		{"Slashes", `"""hello \ /"""`, token.Token{Type: token.BLOCK_STRING, Literal: `hello \ /`, Start: 0, End: 15}},
+		{"Unescaped control characters", `"""hello \b\f\n\r\t"""`, token.Token{Type: token.BLOCK_STRING, Literal: `hello \b\f\n\r\t`, Start: 0, End: 22}},
+		{"Unescaped Unicode", `"""hello 🫶"""`, token.Token{Type: token.BLOCK_STRING, Literal: "hello 🫶", Start: 0, End: 16}},
 		{"Multiple lines", `"""
 
         foo
             bar
                 baz
 
-        """`, token.Token{Type: token.STRING_VALUE, Literal: "foo\n    bar\n        baz", Start: 0, End: 65}},
+        """`, token.Token{Type: token.BLOCK_STRING, Literal: "foo\n    bar\n        baz", Start: 0, End: 65}},
 	})
 }
 

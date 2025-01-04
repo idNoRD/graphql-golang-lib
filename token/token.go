@@ -26,7 +26,6 @@ const (
 	NAME
 	INT
 	FLOAT
-	STRING_VALUE // TODO: remove
 	STRING
 	BLOCK_STRING
 	COMMENT
@@ -53,7 +52,6 @@ var types = [...]string{
 	NAME:         "NAME",
 	INT:          "INT",
 	FLOAT:        "FLOAT",
-	STRING_VALUE: "STRING_VALUE", // TODO: remove
 	STRING:       "STRING",
 	BLOCK_STRING: "BLOCK_STRING",
 	COMMENT:      "COMMENT",
