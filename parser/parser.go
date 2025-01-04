@@ -460,11 +460,11 @@ func (p *Parser) parseDirectiveDefinition() (ast.Definition, error) {
 		return nil, err
 	}
 
-	locs, err := p.parseDirectiveLocations()
+	locations, err := p.parseDirectiveLocations()
 	if err != nil {
 		return nil, err
 	}
-	directiveDef.Locations = locs
+	directiveDef.Locations = locations
 
 	return directiveDef, nil
 }
