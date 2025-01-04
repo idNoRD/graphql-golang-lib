@@ -968,8 +968,7 @@ func (p *Parser) parseValue() (ast.Value, error) {
 			return nil, err
 		}
 		return val, nil
-	case token.STRING:
-	case token.BLOCK_STRING:
+	case token.STRING, token.BLOCK_STRING:
 		return p.parseStringValue()
 	case token.NAME:
 		switch p.curToken.Literal {
