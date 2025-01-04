@@ -115,9 +115,6 @@ func (p *Parser) parseDefinition() (ast.Definition, error) {
 			return p.parseInputObjectTypeDefinition()
 		case "directive":
 			return p.parseDirectiveDefinition()
-		}
-
-		switch p.curToken.Literal {
 		case "query", "mutation", "subscription":
 			return p.parseOperationDefinition()
 		case "fragment":
@@ -127,7 +124,7 @@ func (p *Parser) parseDefinition() (ast.Definition, error) {
 		}
 	}
 
-	return nil, nil
+	return nil, fmt.Errorf("unexpected keyword %s", p.curToken.Literal)
 }
 
 func (p *Parser) parseSchemaDefinition() (ast.Definition, error) {
