@@ -477,9 +477,6 @@ func (p *Parser) parseDirectiveDefinition() (ast.Definition, error) {
 }
 
 func (p *Parser) parseDirectiveLocations() (ast.DirectiveLocations, error) {
-	if err := p.expectAndAdvance(token.EQUALS); err != nil {
-		return nil, err
-	}
 	var types ast.DirectiveLocations
 	for {
 		nt, err := p.parseName()
