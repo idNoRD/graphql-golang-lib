@@ -1439,22 +1439,24 @@ func (p *Parser) parseSchemaExtension() (*ast.SchemaExtension, error) {
 	}
 	se.Directives = directives
 
-	if err := p.expectAndAdvance(token.LBRACE); err != nil {
-		return nil, err
-	}
-
-	var roots []*ast.RootOperationTypeDefinition
-	for p.curToken.Type != token.RBRACE && p.curToken.Type != token.EOF {
-		root, err := p.parseRootOperationTypeDefinition()
-		if err != nil {
+	if p.curToken.Type != token.LBRACE {
+		if err := p.next(); err != nil {
 			return nil, err
 		}
-		roots = append(roots, root)
-	}
-	se.RootOperationDefs = roots
 
-	if err := p.expectAndAdvance(token.RBRACE); err != nil {
-		return nil, err
+		var roots []*ast.RootOperationTypeDefinition
+		for p.curToken.Type != token.RBRACE && p.curToken.Type != token.EOF {
+			root, err := p.parseRootOperationTypeDefinition()
+			if err != nil {
+				return nil, err
+			}
+			roots = append(roots, root)
+		}
+		se.RootOperationDefs = roots
+
+		if err := p.expectAndAdvance(token.RBRACE); err != nil {
+			return nil, err
+		}
 	}
 
 	return se, nil
