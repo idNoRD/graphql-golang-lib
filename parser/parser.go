@@ -130,6 +130,374 @@ func (p *Parser) parseDefinition() (ast.Definition, error) {
 	return nil, nil
 }
 
+func (p *Parser) parseSchemaDefinition() (ast.Definition, error) {
+	sd := &ast.SchemaDefinition{
+		Position: p.curToken.Start,
+	}
+
+	if isDescription(p.curToken.Type) {
+		desc, err := p.parseDescription()
+		if err != nil {
+			return nil, err
+		}
+		sd.Description = desc
+	}
+
+	if err := p.expectLiteralAndAdvance("schema"); err != nil {
+		return nil, err
+	}
+
+	dirs, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+	sd.Directives = dirs
+
+	if err := p.expectAndAdvance(token.LBRACE); err != nil {
+		return nil, err
+	}
+
+	var roots []*ast.RootOperationTypeDefinition
+	for p.curToken.Type != token.RBRACE && p.curToken.Type != token.EOF {
+		rootDef, err := p.parseRootOperationTypeDefinition()
+		if err != nil {
+			return nil, err
+		}
+		roots = append(roots, rootDef)
+	}
+	sd.RootOperationDefs = roots
+
+	if err := p.expectAndAdvance(token.RBRACE); err != nil {
+		return nil, err
+	}
+
+	return sd, nil
+}
+
+func (p *Parser) parseScalarTypeDefinition() (ast.Definition, error) {
+	sdef := &ast.ScalarTypeDefinition{
+		Position: p.curToken.Start,
+	}
+
+	if isDescription(p.curToken.Type) {
+		desc, err := p.parseDescription()
+		if err != nil {
+			return nil, err
+		}
+		sdef.Description = desc
+	}
+
+	if err := p.expectLiteralAndAdvance("scalar"); err != nil {
+		return nil, err
+	}
+
+	name, err := p.parseName()
+	if err != nil {
+		return nil, err
+	}
+	sdef.Name = name
+
+	dirs, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+	sdef.Directives = dirs
+
+	return sdef, nil
+}
+
+func (p *Parser) parseObjectTypeDefinition() (ast.Definition, error) {
+	odef := &ast.ObjectTypeDefinition{
+		Position: p.curToken.Start,
+	}
+
+	if isDescription(p.curToken.Type) {
+		desc, err := p.parseDescription()
+		if err != nil {
+			return nil, err
+		}
+		odef.Description = desc
+	}
+
+	if err := p.expectLiteralAndAdvance("type"); err != nil {
+		return nil, err
+	}
+
+	name, err := p.parseName()
+	if err != nil {
+		return nil, err
+	}
+	odef.Name = name
+
+	if p.curToken.Literal == "implements" {
+		ii, err := p.parseImplementsInterfaces()
+		if err != nil {
+			return nil, err
+		}
+		odef.Interfaces = ii
+	}
+
+	dirs, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+	odef.Directives = dirs
+
+	if p.curToken.Type == token.LBRACE {
+		fields, err := p.parseFieldsDefinition()
+		if err != nil {
+			return nil, err
+		}
+		odef.Fields = fields
+	}
+
+	return odef, nil
+}
+
+func (p *Parser) parseInterfaceTypeDefinition() (ast.Definition, error) {
+	idef := &ast.InterfaceTypeDefinition{
+		Position: p.curToken.Start,
+	}
+
+	if isDescription(p.curToken.Type) {
+		desc, err := p.parseDescription()
+		if err != nil {
+			return nil, err
+		}
+		idef.Description = desc
+	}
+
+	if err := p.expectLiteralAndAdvance("interface"); err != nil {
+		return nil, err
+	}
+
+	name, err := p.parseName()
+	if err != nil {
+		return nil, err
+	}
+	idef.Name = name
+
+	if p.curToken.Literal == "implements" {
+		ii, err := p.parseImplementsInterfaces()
+		if err != nil {
+			return nil, err
+		}
+		idef.Interfaces = ii
+	}
+
+	dirs, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+	idef.Directives = dirs
+
+	if p.curToken.Type == token.LBRACE {
+		fields, err := p.parseFieldsDefinition()
+		if err != nil {
+			return nil, err
+		}
+		idef.Fields = fields
+	}
+
+	return idef, nil
+}
+
+func (p *Parser) parseUnionTypeDefinition() (ast.Definition, error) {
+	udef := &ast.UnionTypeDefinition{
+		Position: p.curToken.Start,
+	}
+
+	if isDescription(p.curToken.Type) {
+		desc, err := p.parseDescription()
+		if err != nil {
+			return nil, err
+		}
+		udef.Description = desc
+	}
+
+	if err := p.expectLiteralAndAdvance("union"); err != nil {
+		return nil, err
+	}
+
+	name, err := p.parseName()
+	if err != nil {
+		return nil, err
+	}
+	udef.Name = name
+
+	dirs, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+	udef.Directives = dirs
+
+	if p.curToken.Type == token.EQUALS {
+		types, err := p.parseUnionMemberTypes()
+		if err != nil {
+			return nil, err
+		}
+		udef.Types = types
+	}
+
+	return udef, nil
+}
+
+func (p *Parser) parseEnumTypeDefinition() (ast.Definition, error) {
+	edef := &ast.EnumTypeDefinition{
+		Position: p.curToken.Start,
+	}
+
+	if isDescription(p.curToken.Type) {
+		desc, err := p.parseDescription()
+		if err != nil {
+			return nil, err
+		}
+		edef.Description = desc
+	}
+
+	if err := p.expectLiteralAndAdvance("enum"); err != nil {
+		return nil, err
+	}
+
+	name, err := p.parseName()
+	if err != nil {
+		return nil, err
+	}
+	edef.Name = name
+
+	dirs, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+	edef.Directives = dirs
+
+	if p.curToken.Type == token.LBRACE {
+		vals, err := p.parseEnumValuesDefinition()
+		if err != nil {
+			return nil, err
+		}
+		edef.Values = vals
+	}
+
+	return edef, nil
+}
+
+func (p *Parser) parseInputObjectTypeDefinition() (ast.Definition, error) {
+	iod := &ast.InputObjectTypeDefinition{
+		Position: p.curToken.Start,
+	}
+
+	if isDescription(p.curToken.Type) {
+		desc, err := p.parseDescription()
+		if err != nil {
+			return nil, err
+		}
+		iod.Description = desc
+	}
+
+	if err := p.expectLiteralAndAdvance("input"); err != nil {
+		return nil, err
+	}
+
+	name, err := p.parseName()
+	if err != nil {
+		return nil, err
+	}
+	iod.Name = name
+
+	dirs, err := p.parseDirectives()
+	if err != nil {
+		return nil, err
+	}
+	iod.Directives = dirs
+
+	if p.curToken.Type == token.LBRACE {
+		fields, err := p.parseInputFieldsDefinition()
+		if err != nil {
+			return nil, err
+		}
+		iod.Fields = fields
+	}
+
+	return iod, nil
+}
+
+func (p *Parser) parseDirectiveDefinition() (ast.Definition, error) {
+	ddef := &ast.DirectiveDefinition{
+		Position: p.curToken.Start,
+	}
+
+	if isDescription(p.curToken.Type) {
+		desc, err := p.parseDescription()
+		if err != nil {
+			return nil, err
+		}
+		ddef.Description = desc
+	}
+
+	if err := p.expectLiteralAndAdvance("directive"); err != nil {
+		return nil, err
+	}
+	if err := p.expectAndAdvance(token.AT); err != nil {
+		return nil, err
+	}
+
+	name, err := p.parseName()
+	if err != nil {
+		return nil, err
+	}
+	ddef.Name = name
+
+	if p.curToken.Type == token.LPAREN {
+		args, err := p.parseArgumentsDefinition()
+		if err != nil {
+			return nil, err
+		}
+		ddef.Arguments = args
+	}
+
+	if p.curToken.Literal == "repeatable" {
+		if err := p.next(); err != nil {
+			return nil, err
+		}
+		ddef.Repeatable = true
+	}
+
+	if err := p.expectLiteralAndAdvance("on"); err != nil {
+		return nil, err
+	}
+
+	locs, err := p.parseDirectiveLocations()
+	if err != nil {
+		return nil, err
+	}
+	ddef.Locations = locs
+
+	return ddef, nil
+}
+
+func (p *Parser) parseDirectiveLocations() (ast.DirectiveLocations, error) {
+	if err := p.expectAndAdvance(token.EQUALS); err != nil {
+		return nil, err
+	}
+	var types ast.DirectiveLocations
+	for {
+		nt, err := p.parseName()
+		if err != nil {
+			return nil, err
+		}
+		types = append(types, nt)
+		if p.curToken.Type == token.PIPE {
+			if err := p.next(); err != nil {
+				return nil, err
+			}
+			continue
+		}
+		break
+	}
+	return types, nil
+}
+
 func (p *Parser) parseOperationType() (ast.OperationType, error) {
 	if err := p.expect(token.NAME); err != nil {
 		return "", err

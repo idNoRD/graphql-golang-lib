@@ -331,6 +331,7 @@ type DirectiveDefinition struct {
 	Description *StringValue
 	Name        *Name
 	Arguments   []*InputValueDefinition
+	Repeatable  bool
 	Locations   []*Name
 }
 
@@ -338,6 +339,11 @@ func (d *DirectiveDefinition) Pos() int                  { return d.Position }
 func (d *DirectiveDefinition) End() int                  { return -1 }
 func (d *DirectiveDefinition) definitionNode()           {}
 func (d *DirectiveDefinition) typeSystemDefinitionNode() {}
+
+// DirectiveLocations
+//
+// https://spec.graphql.org/draft/#DirectiveLocations
+type DirectiveLocations []*Name
 
 // TypeSystemExtension
 //
