@@ -1249,12 +1249,12 @@ func (p *Parser) parseEnumTypeExtension() (ast.Definition, error) {
 	return ext, nil
 }
 
-func (p *Parser) parseEnumValuesDefinition() (ast.EnumValuesDefinition, error) {
+func (p *Parser) parseEnumValuesDefinition() ([]*ast.EnumValueDefinition, error) {
 	if err := p.expectAndAdvance(token.LBRACE); err != nil {
 		return nil, err
 	}
 
-	var vals ast.EnumValuesDefinition
+	var vals []*ast.EnumValueDefinition
 	for p.curToken.Type != token.RBRACE && p.curToken.Type != token.EOF {
 		ev, err := p.parseEnumValueDefinition()
 		if err != nil {
@@ -1347,11 +1347,11 @@ func (p *Parser) parseEnumValueName() (*ast.Name, error) {
 	return p.parseName()
 }
 
-func (p *Parser) parseUnionMemberTypes() (ast.UnionMemberTypes, error) {
+func (p *Parser) parseUnionMemberTypes() ([]*ast.NamedType, error) {
 	if err := p.expectAndAdvance(token.EQUALS); err != nil {
 		return nil, err
 	}
-	var types ast.UnionMemberTypes
+	var types []*ast.NamedType
 	for {
 		nt, err := p.parseNamedType()
 		if err != nil {
@@ -1554,11 +1554,11 @@ func (p *Parser) parseObjectTypeExtension() (*ast.ObjectTypeExtension, error) {
 	return ext, nil
 }
 
-func (p *Parser) parseImplementsInterfaces() (ast.ImplementsInterfaces, error) {
+func (p *Parser) parseImplementsInterfaces() ([]*ast.NamedType, error) {
 	if err := p.expectLiteralAndAdvance("implements"); err != nil {
 		return nil, err
 	}
-	var interfaces ast.ImplementsInterfaces
+	var interfaces []*ast.NamedType
 	for {
 		nt, err := p.parseNamedType()
 		if err != nil {
@@ -1576,8 +1576,8 @@ func (p *Parser) parseImplementsInterfaces() (ast.ImplementsInterfaces, error) {
 	return interfaces, nil
 }
 
-func (p *Parser) parseFieldsDefinition() (ast.FieldsDefinition, error) {
-	var fields ast.FieldsDefinition
+func (p *Parser) parseFieldsDefinition() ([]*ast.FieldDefinition, error) {
+	var fields []*ast.FieldDefinition
 
 	if err := p.expectAndAdvance(token.LBRACE); err != nil {
 		return nil, err
@@ -1617,14 +1617,13 @@ func (p *Parser) parseFieldDefinition() (*ast.FieldDefinition, error) {
 	}
 	f.Name = name
 
-	var args ast.ArgumentsDefinition
 	if p.curToken.Type == token.LPAREN {
-		args, err = p.parseArgumentsDefinition()
+		args, err := p.parseArgumentsDefinition()
 		if err != nil {
 			return nil, err
 		}
+		f.Arguments = args
 	}
-	f.Arguments = args
 
 	if err := p.expectAndAdvance(token.COLON); err != nil {
 		return nil, err
@@ -1645,8 +1644,8 @@ func (p *Parser) parseFieldDefinition() (*ast.FieldDefinition, error) {
 	return f, nil
 }
 
-func (p *Parser) parseArgumentsDefinition() (ast.ArgumentsDefinition, error) {
-	var defs ast.ArgumentsDefinition
+func (p *Parser) parseArgumentsDefinition() ([]*ast.InputValueDefinition, error) {
+	var defs []*ast.InputValueDefinition
 
 	if err := p.expectAndAdvance(token.LPAREN); err != nil {
 		return nil, err

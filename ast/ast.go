@@ -114,9 +114,9 @@ func (s *ScalarTypeExtension) typeSystemExtensionNode() {}
 type ObjectTypeExtension struct {
 	Position   int
 	Name       *Name
-	Interfaces ImplementsInterfaces
+	Interfaces []*NamedType
 	Directives []*Directive
-	Fields     FieldsDefinition
+	Fields     []*FieldDefinition
 }
 
 func (o *ObjectTypeExtension) Pos() int                 { return o.Position }
@@ -124,20 +124,15 @@ func (o *ObjectTypeExtension) End() int                 { return -1 }
 func (o *ObjectTypeExtension) definitionNode()          {}
 func (o *ObjectTypeExtension) typeSystemExtensionNode() {}
 
-// ImplementsInterfaces
-//
-// https://spec.graphql.org/draft/#ImplementsInterfaces
-type ImplementsInterfaces []*NamedType
-
 // InterfaceTypeExtension
 //
 // https://spec.graphql.org/draft/#InterfaceTypeExtension
 type InterfaceTypeExtension struct {
 	Position   int
 	Name       *Name
-	Interfaces ImplementsInterfaces
+	Interfaces []*NamedType
 	Directives []*Directive
-	Fields     FieldsDefinition
+	Fields     []*FieldDefinition
 }
 
 func (i *InterfaceTypeExtension) Pos() int                 { return i.Position }
@@ -152,18 +147,13 @@ type UnionTypeExtension struct {
 	Position   int
 	Name       *Name
 	Directives []*Directive
-	Types      UnionMemberTypes
+	Types      []*NamedType
 }
 
 func (u *UnionTypeExtension) Pos() int                 { return u.Position }
 func (u *UnionTypeExtension) End() int                 { return -1 }
 func (u *UnionTypeExtension) definitionNode()          {}
 func (u *UnionTypeExtension) typeSystemExtensionNode() {}
-
-// UnionMemberTypes
-//
-// https://spec.graphql.org/draft/#UnionMemberTypes
-type UnionMemberTypes []*NamedType
 
 // EnumTypeExtension
 //
@@ -172,7 +162,7 @@ type EnumTypeExtension struct {
 	Position   int
 	Name       *Name
 	Directives []*Directive
-	Values     EnumValuesDefinition
+	Values     []*EnumValueDefinition
 }
 
 func (e *EnumTypeExtension) Pos() int                 { return e.Position }
@@ -202,23 +192,13 @@ type FieldDefinition struct {
 	Position    int
 	Description *StringValue
 	Name        *Name
-	Arguments   ArgumentsDefinition
+	Arguments   []*InputValueDefinition
 	Type        Type
 	Directives  []*Directive
 }
 
 func (f *FieldDefinition) Pos() int { return f.Position }
 func (f *FieldDefinition) End() int { return -1 }
-
-// FieldsDefinition
-//
-// https://spec.graphql.org/draft/#FieldsDefinition
-type FieldsDefinition []*FieldDefinition
-
-// ArgumentsDefinition
-//
-// https://spec.graphql.org/draft/#ArgumentsDefinition
-type ArgumentsDefinition []*InputValueDefinition
 
 // InterfaceTypeDefinition
 //
@@ -281,11 +261,6 @@ type EnumValueDefinition struct {
 
 func (e *EnumValueDefinition) Pos() int { return e.Position }
 func (e *EnumValueDefinition) End() int { return -1 }
-
-// EnumValuesDefinition
-//
-// https://spec.graphql.org/draft/#EnumValuesDefinition
-type EnumValuesDefinition []*EnumValueDefinition
 
 // InputObjectTypeDefinition
 //
