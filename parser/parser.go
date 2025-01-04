@@ -34,13 +34,7 @@ func (p *Parser) ParseDocument() (*ast.Document, error) {
 		if err != nil {
 			return nil, err
 		}
-		if def != nil {
-			doc.Definitions = append(doc.Definitions, def)
-		}
-
-		if err = p.next(); err != nil {
-			return nil, err
-		}
+		doc.Definitions = append(doc.Definitions, def)
 	}
 
 	return doc, nil
@@ -97,8 +91,15 @@ func (p *Parser) parseDefinition() (ast.Definition, error) {
 		return p.parseAnonymousOperation()
 	}
 
-	if p.peekToken.Type == token.NAME {
-		switch p.curToken.Literal {
+	var tok token.Token
+	if isDescription(p.curToken.Type) {
+		tok = p.peekToken
+	} else {
+		tok = p.curToken
+	}
+
+	if tok.Type == token.NAME {
+		switch tok.Literal {
 		case "schema":
 			return p.parseSchemaDefinition()
 		case "scalar":
@@ -691,7 +692,7 @@ func (p *Parser) parseFragmentDefinition() (*ast.FragmentDefinition, error) {
 		Position: p.curToken.Start,
 	}
 
-	if err := p.next(); err != nil {
+	if err := p.expectLiteralAndAdvance("fragment"); err != nil {
 		return nil, err
 	}
 
@@ -701,18 +702,11 @@ func (p *Parser) parseFragmentDefinition() (*ast.FragmentDefinition, error) {
 	}
 	frag.Name = name
 
-	if p.curToken.Literal != "on" {
-		return nil, fmt.Errorf("expected 'on', got %s", p.curToken.Literal)
-	}
-	if err := p.next(); err != nil {
-		return nil, err
-	}
-
-	namedType, err := p.parseNamedType()
+	typeCond, err := p.parseTypeCondition()
 	if err != nil {
 		return nil, err
 	}
-	frag.TypeCondition = namedType
+	frag.TypeCondition = typeCond
 
 	ss, err := p.parseSelectionSet()
 	if err != nil {
@@ -721,6 +715,13 @@ func (p *Parser) parseFragmentDefinition() (*ast.FragmentDefinition, error) {
 	frag.SelectionSet = ss
 
 	return frag, nil
+}
+
+func (p *Parser) parseTypeCondition() (*ast.NamedType, error) {
+	if err := p.expectLiteralAndAdvance("on"); err != nil {
+		return nil, err
+	}
+	return p.parseNamedType()
 }
 
 func (p *Parser) parseSelectionSet() (*ast.SelectionSet, error) {
