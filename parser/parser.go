@@ -85,9 +85,6 @@ func (p *Parser) expectLiteralAndAdvance(lit string) error {
 
 func (p *Parser) parseDefinition() (ast.Definition, error) {
 	if p.peekToken.Type == token.LBRACE {
-		if err := p.next(); err != nil {
-			return nil, err
-		}
 		return p.parseAnonymousOperationDefinition()
 	}
 
