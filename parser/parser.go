@@ -762,6 +762,21 @@ func (p *Parser) parseFragmentSpread() (*ast.FragmentSpread, error) {
 	return fs, nil
 }
 
+/*
+TypeSystemExtension:
+
+	SchemaExtension
+	TypeExtension
+
+TypeExtension:
+
+	ScalarTypeExtension
+	ObjectTypeExtension
+	InterfaceTypeExtension
+	UnionTypeExtension
+	EnumTypeExtension
+	InputObjectTypeExtension
+*/
 func (p *Parser) parseTypeSystemExtension() (ast.Definition, error) {
 	switch p.peekToken.Literal {
 	case "schema":
