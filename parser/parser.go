@@ -126,7 +126,7 @@ func (p *Parser) parseDefinition() (ast.Definition, error) {
 }
 
 func (p *Parser) parseSchemaDefinition() (ast.Definition, error) {
-	sd := &ast.SchemaDefinition{
+	schemaDef := &ast.SchemaDefinition{
 		Position: p.curToken.Start,
 	}
 
@@ -135,40 +135,40 @@ func (p *Parser) parseSchemaDefinition() (ast.Definition, error) {
 		if err != nil {
 			return nil, err
 		}
-		sd.Description = desc
+		schemaDef.Description = desc
 	}
 
 	if err := p.expectLiteralAndAdvance("schema"); err != nil {
 		return nil, err
 	}
 
-	dirs, err := p.parseDirectives()
+	directives, err := p.parseDirectives()
 	if err != nil {
 		return nil, err
 	}
-	sd.Directives = dirs
+	schemaDef.Directives = directives
 
 	if err := p.expectAndAdvance(token.LBRACE); err != nil {
 		return nil, err
 	}
 
 	for p.curToken.Type != token.RBRACE && p.curToken.Type != token.EOF {
-		rootDef, err := p.parseRootOperationTypeDefinition()
+		def, err := p.parseRootOperationTypeDefinition()
 		if err != nil {
 			return nil, err
 		}
-		sd.RootOperationDefs = append(sd.RootOperationDefs, rootDef)
+		schemaDef.RootOperationDefs = append(schemaDef.RootOperationDefs, def)
 	}
 
 	if err := p.expectAndAdvance(token.RBRACE); err != nil {
 		return nil, err
 	}
 
-	return sd, nil
+	return schemaDef, nil
 }
 
 func (p *Parser) parseScalarTypeDefinition() (ast.Definition, error) {
-	sdef := &ast.ScalarTypeDefinition{
+	scalarTypeDef := &ast.ScalarTypeDefinition{
 		Position: p.curToken.Start,
 	}
 
@@ -177,7 +177,7 @@ func (p *Parser) parseScalarTypeDefinition() (ast.Definition, error) {
 		if err != nil {
 			return nil, err
 		}
-		sdef.Description = desc
+		scalarTypeDef.Description = desc
 	}
 
 	if err := p.expectLiteralAndAdvance("scalar"); err != nil {
@@ -188,19 +188,19 @@ func (p *Parser) parseScalarTypeDefinition() (ast.Definition, error) {
 	if err != nil {
 		return nil, err
 	}
-	sdef.Name = name
+	scalarTypeDef.Name = name
 
-	dirs, err := p.parseDirectives()
+	directives, err := p.parseDirectives()
 	if err != nil {
 		return nil, err
 	}
-	sdef.Directives = dirs
+	scalarTypeDef.Directives = directives
 
-	return sdef, nil
+	return scalarTypeDef, nil
 }
 
 func (p *Parser) parseObjectTypeDefinition() (ast.Definition, error) {
-	odef := &ast.ObjectTypeDefinition{
+	objTypeDef := &ast.ObjectTypeDefinition{
 		Position: p.curToken.Start,
 	}
 
@@ -209,7 +209,7 @@ func (p *Parser) parseObjectTypeDefinition() (ast.Definition, error) {
 		if err != nil {
 			return nil, err
 		}
-		odef.Description = desc
+		objTypeDef.Description = desc
 	}
 
 	if err := p.expectLiteralAndAdvance("type"); err != nil {
@@ -220,35 +220,35 @@ func (p *Parser) parseObjectTypeDefinition() (ast.Definition, error) {
 	if err != nil {
 		return nil, err
 	}
-	odef.Name = name
+	objTypeDef.Name = name
 
 	if p.curToken.Literal == "implements" {
 		ii, err := p.parseImplementsInterfaces()
 		if err != nil {
 			return nil, err
 		}
-		odef.Interfaces = ii
+		objTypeDef.Interfaces = ii
 	}
 
-	dirs, err := p.parseDirectives()
+	directives, err := p.parseDirectives()
 	if err != nil {
 		return nil, err
 	}
-	odef.Directives = dirs
+	objTypeDef.Directives = directives
 
 	if p.curToken.Type == token.LBRACE {
 		fields, err := p.parseFieldsDefinition()
 		if err != nil {
 			return nil, err
 		}
-		odef.Fields = fields
+		objTypeDef.Fields = fields
 	}
 
-	return odef, nil
+	return objTypeDef, nil
 }
 
 func (p *Parser) parseInterfaceTypeDefinition() (ast.Definition, error) {
-	idef := &ast.InterfaceTypeDefinition{
+	interfaceTypeDef := &ast.InterfaceTypeDefinition{
 		Position: p.curToken.Start,
 	}
 
@@ -257,7 +257,7 @@ func (p *Parser) parseInterfaceTypeDefinition() (ast.Definition, error) {
 		if err != nil {
 			return nil, err
 		}
-		idef.Description = desc
+		interfaceTypeDef.Description = desc
 	}
 
 	if err := p.expectLiteralAndAdvance("interface"); err != nil {
@@ -268,35 +268,35 @@ func (p *Parser) parseInterfaceTypeDefinition() (ast.Definition, error) {
 	if err != nil {
 		return nil, err
 	}
-	idef.Name = name
+	interfaceTypeDef.Name = name
 
 	if p.curToken.Literal == "implements" {
 		ii, err := p.parseImplementsInterfaces()
 		if err != nil {
 			return nil, err
 		}
-		idef.Interfaces = ii
+		interfaceTypeDef.Interfaces = ii
 	}
 
-	dirs, err := p.parseDirectives()
+	directives, err := p.parseDirectives()
 	if err != nil {
 		return nil, err
 	}
-	idef.Directives = dirs
+	interfaceTypeDef.Directives = directives
 
 	if p.curToken.Type == token.LBRACE {
 		fields, err := p.parseFieldsDefinition()
 		if err != nil {
 			return nil, err
 		}
-		idef.Fields = fields
+		interfaceTypeDef.Fields = fields
 	}
 
-	return idef, nil
+	return interfaceTypeDef, nil
 }
 
 func (p *Parser) parseUnionTypeDefinition() (ast.Definition, error) {
-	udef := &ast.UnionTypeDefinition{
+	unionTypeDef := &ast.UnionTypeDefinition{
 		Position: p.curToken.Start,
 	}
 
@@ -305,7 +305,7 @@ func (p *Parser) parseUnionTypeDefinition() (ast.Definition, error) {
 		if err != nil {
 			return nil, err
 		}
-		udef.Description = desc
+		unionTypeDef.Description = desc
 	}
 
 	if err := p.expectLiteralAndAdvance("union"); err != nil {
@@ -316,27 +316,27 @@ func (p *Parser) parseUnionTypeDefinition() (ast.Definition, error) {
 	if err != nil {
 		return nil, err
 	}
-	udef.Name = name
+	unionTypeDef.Name = name
 
-	dirs, err := p.parseDirectives()
+	directives, err := p.parseDirectives()
 	if err != nil {
 		return nil, err
 	}
-	udef.Directives = dirs
+	unionTypeDef.Directives = directives
 
 	if p.curToken.Type == token.EQUALS {
 		types, err := p.parseUnionMemberTypes()
 		if err != nil {
 			return nil, err
 		}
-		udef.Types = types
+		unionTypeDef.Types = types
 	}
 
-	return udef, nil
+	return unionTypeDef, nil
 }
 
 func (p *Parser) parseEnumTypeDefinition() (ast.Definition, error) {
-	edef := &ast.EnumTypeDefinition{
+	enumTypeDef := &ast.EnumTypeDefinition{
 		Position: p.curToken.Start,
 	}
 
@@ -345,7 +345,7 @@ func (p *Parser) parseEnumTypeDefinition() (ast.Definition, error) {
 		if err != nil {
 			return nil, err
 		}
-		edef.Description = desc
+		enumTypeDef.Description = desc
 	}
 
 	if err := p.expectLiteralAndAdvance("enum"); err != nil {
@@ -356,27 +356,27 @@ func (p *Parser) parseEnumTypeDefinition() (ast.Definition, error) {
 	if err != nil {
 		return nil, err
 	}
-	edef.Name = name
+	enumTypeDef.Name = name
 
-	dirs, err := p.parseDirectives()
+	directives, err := p.parseDirectives()
 	if err != nil {
 		return nil, err
 	}
-	edef.Directives = dirs
+	enumTypeDef.Directives = directives
 
 	if p.curToken.Type == token.LBRACE {
 		vals, err := p.parseEnumValuesDefinition()
 		if err != nil {
 			return nil, err
 		}
-		edef.Values = vals
+		enumTypeDef.Values = vals
 	}
 
-	return edef, nil
+	return enumTypeDef, nil
 }
 
 func (p *Parser) parseInputObjectTypeDefinition() (ast.Definition, error) {
-	iod := &ast.InputObjectTypeDefinition{
+	inputObjTypeDef := &ast.InputObjectTypeDefinition{
 		Position: p.curToken.Start,
 	}
 
@@ -385,7 +385,7 @@ func (p *Parser) parseInputObjectTypeDefinition() (ast.Definition, error) {
 		if err != nil {
 			return nil, err
 		}
-		iod.Description = desc
+		inputObjTypeDef.Description = desc
 	}
 
 	if err := p.expectLiteralAndAdvance("input"); err != nil {
@@ -396,27 +396,27 @@ func (p *Parser) parseInputObjectTypeDefinition() (ast.Definition, error) {
 	if err != nil {
 		return nil, err
 	}
-	iod.Name = name
+	inputObjTypeDef.Name = name
 
-	dirs, err := p.parseDirectives()
+	directives, err := p.parseDirectives()
 	if err != nil {
 		return nil, err
 	}
-	iod.Directives = dirs
+	inputObjTypeDef.Directives = directives
 
 	if p.curToken.Type == token.LBRACE {
 		fields, err := p.parseInputFieldsDefinition()
 		if err != nil {
 			return nil, err
 		}
-		iod.Fields = fields
+		inputObjTypeDef.Fields = fields
 	}
 
-	return iod, nil
+	return inputObjTypeDef, nil
 }
 
 func (p *Parser) parseDirectiveDefinition() (ast.Definition, error) {
-	ddef := &ast.DirectiveDefinition{
+	directiveDef := &ast.DirectiveDefinition{
 		Position: p.curToken.Start,
 	}
 
@@ -425,7 +425,7 @@ func (p *Parser) parseDirectiveDefinition() (ast.Definition, error) {
 		if err != nil {
 			return nil, err
 		}
-		ddef.Description = desc
+		directiveDef.Description = desc
 	}
 
 	if err := p.expectLiteralAndAdvance("directive"); err != nil {
@@ -439,21 +439,21 @@ func (p *Parser) parseDirectiveDefinition() (ast.Definition, error) {
 	if err != nil {
 		return nil, err
 	}
-	ddef.Name = name
+	directiveDef.Name = name
 
 	if p.curToken.Type == token.LPAREN {
 		args, err := p.parseArgumentsDefinition()
 		if err != nil {
 			return nil, err
 		}
-		ddef.Arguments = args
+		directiveDef.Arguments = args
 	}
 
 	if p.curToken.Literal == "repeatable" {
 		if err := p.next(); err != nil {
 			return nil, err
 		}
-		ddef.Repeatable = true
+		directiveDef.Repeatable = true
 	}
 
 	if err := p.expectLiteralAndAdvance("on"); err != nil {
@@ -464,19 +464,19 @@ func (p *Parser) parseDirectiveDefinition() (ast.Definition, error) {
 	if err != nil {
 		return nil, err
 	}
-	ddef.Locations = locs
+	directiveDef.Locations = locs
 
-	return ddef, nil
+	return directiveDef, nil
 }
 
-func (p *Parser) parseDirectiveLocations() (ast.DirectiveLocations, error) {
-	var types ast.DirectiveLocations
+func (p *Parser) parseDirectiveLocations() ([]*ast.Name, error) {
+	var directiveLocations []*ast.Name
 	for {
 		nt, err := p.parseName()
 		if err != nil {
 			return nil, err
 		}
-		types = append(types, nt)
+		directiveLocations = append(directiveLocations, nt)
 		if p.curToken.Type == token.PIPE {
 			if err := p.next(); err != nil {
 				return nil, err
@@ -485,7 +485,7 @@ func (p *Parser) parseDirectiveLocations() (ast.DirectiveLocations, error) {
 		}
 		break
 	}
-	return types, nil
+	return directiveLocations, nil
 }
 
 func (p *Parser) parseOperationType() (ast.OperationType, error) {
@@ -501,7 +501,7 @@ func (p *Parser) parseOperationType() (ast.OperationType, error) {
 }
 
 func (p *Parser) parseOperationDefinition() (*ast.OperationDefinition, error) {
-	op := &ast.OperationDefinition{
+	opDef := &ast.OperationDefinition{
 		Position: p.curToken.Start,
 	}
 
@@ -509,14 +509,14 @@ func (p *Parser) parseOperationDefinition() (*ast.OperationDefinition, error) {
 	if err != nil {
 		return nil, err
 	}
-	op.OperationType = opType
+	opDef.OperationType = opType
 
 	if p.curToken.Type == token.NAME {
 		name, err := p.parseName()
 		if err != nil {
 			return nil, err
 		}
-		op.Name = name
+		opDef.Name = name
 	}
 
 	if p.curToken.Type == token.LPAREN {
@@ -524,22 +524,22 @@ func (p *Parser) parseOperationDefinition() (*ast.OperationDefinition, error) {
 		if err != nil {
 			return nil, err
 		}
-		op.VariableDefs = varDefs
+		opDef.VariableDefs = varDefs
 	}
 
 	directives, err := p.parseDirectives()
 	if err != nil {
 		return nil, err
 	}
-	op.Directives = directives
+	opDef.Directives = directives
 
 	selectionSet, err := p.parseSelectionSet()
 	if err != nil {
 		return nil, err
 	}
-	op.SelectionSet = selectionSet
+	opDef.SelectionSet = selectionSet
 
-	return op, nil
+	return opDef, nil
 }
 
 func (p *Parser) parseName() (*ast.Name, error) {
@@ -557,7 +557,7 @@ func (p *Parser) parseName() (*ast.Name, error) {
 }
 
 func (p *Parser) parseVariableDefinitions() ([]*ast.VariableDefinition, error) {
-	var defs []*ast.VariableDefinition
+	var varDefs []*ast.VariableDefinition
 
 	if err := p.expectAndAdvance(token.LPAREN); err != nil {
 		return nil, err
@@ -568,18 +568,18 @@ func (p *Parser) parseVariableDefinitions() ([]*ast.VariableDefinition, error) {
 		if err != nil {
 			return nil, err
 		}
-		defs = append(defs, def)
+		varDefs = append(varDefs, def)
 	}
 
 	if err := p.expectAndAdvance(token.RPAREN); err != nil {
 		return nil, err
 	}
 
-	return defs, nil
+	return varDefs, nil
 }
 
 func (p *Parser) parseVariableDefinition() (*ast.VariableDefinition, error) {
-	vd := &ast.VariableDefinition{
+	varDef := &ast.VariableDefinition{
 		Position: p.curToken.Start,
 	}
 
@@ -591,7 +591,7 @@ func (p *Parser) parseVariableDefinition() (*ast.VariableDefinition, error) {
 	if !ok {
 		return nil, fmt.Errorf("expected *ast.Variable, got %T", val)
 	}
-	vd.Variable = variable
+	varDef.Variable = variable
 
 	if err := p.expectAndAdvance(token.COLON); err != nil {
 		return nil, err
@@ -601,7 +601,7 @@ func (p *Parser) parseVariableDefinition() (*ast.VariableDefinition, error) {
 	if err != nil {
 		return nil, err
 	}
-	vd.Type = typ
+	varDef.Type = typ
 
 	if p.curToken.Type == token.EQUALS {
 		if err := p.next(); err != nil {
@@ -611,16 +611,16 @@ func (p *Parser) parseVariableDefinition() (*ast.VariableDefinition, error) {
 		if err != nil {
 			return nil, err
 		}
-		vd.DefaultValue = val
+		varDef.DefaultValue = val
 	}
 
 	directives, err := p.parseDirectives()
 	if err != nil {
 		return nil, err
 	}
-	vd.Directives = directives
+	varDef.Directives = directives
 
-	return vd, nil
+	return varDef, nil
 }
 
 func (p *Parser) parseType() (ast.Type, error) {
@@ -669,21 +669,21 @@ func (p *Parser) parseType() (ast.Type, error) {
 }
 
 func (p *Parser) parseAnonymousOperationDefinition() (*ast.OperationDefinition, error) {
-	op := &ast.OperationDefinition{
+	opDef := &ast.OperationDefinition{
 		OperationType: ast.OperationTypeQuery,
 	}
 
-	ss, err := p.parseSelectionSet()
+	selectionSet, err := p.parseSelectionSet()
 	if err != nil {
 		return nil, err
 	}
-	op.SelectionSet = ss
+	opDef.SelectionSet = selectionSet
 
-	return op, nil
+	return opDef, nil
 }
 
 func (p *Parser) parseFragmentDefinition() (*ast.FragmentDefinition, error) {
-	frag := &ast.FragmentDefinition{
+	fragmentDef := &ast.FragmentDefinition{
 		Position: p.curToken.Start,
 	}
 
@@ -695,21 +695,21 @@ func (p *Parser) parseFragmentDefinition() (*ast.FragmentDefinition, error) {
 	if err != nil {
 		return nil, err
 	}
-	frag.Name = name
+	fragmentDef.Name = name
 
 	typeCond, err := p.parseTypeCondition()
 	if err != nil {
 		return nil, err
 	}
-	frag.TypeCondition = typeCond
+	fragmentDef.TypeCondition = typeCond
 
-	ss, err := p.parseSelectionSet()
+	selectionSet, err := p.parseSelectionSet()
 	if err != nil {
 		return nil, err
 	}
-	frag.SelectionSet = ss
+	fragmentDef.SelectionSet = selectionSet
 
-	return frag, nil
+	return fragmentDef, nil
 }
 
 func (p *Parser) parseTypeCondition() (*ast.NamedType, error) {
@@ -720,7 +720,7 @@ func (p *Parser) parseTypeCondition() (*ast.NamedType, error) {
 }
 
 func (p *Parser) parseSelectionSet() (*ast.SelectionSet, error) {
-	ss := &ast.SelectionSet{
+	selectionSet := &ast.SelectionSet{
 		Position: p.curToken.Start,
 	}
 
@@ -729,18 +729,18 @@ func (p *Parser) parseSelectionSet() (*ast.SelectionSet, error) {
 	}
 
 	for p.curToken.Type != token.RBRACE && p.curToken.Type != token.EOF {
-		sel, err := p.parseSelection()
+		selection, err := p.parseSelection()
 		if err != nil {
 			return nil, err
 		}
-		ss.Selections = append(ss.Selections, sel)
+		selectionSet.Selections = append(selectionSet.Selections, selection)
 	}
 
 	if err := p.expectAndAdvance(token.RBRACE); err != nil {
 		return nil, err
 	}
 
-	return ss, nil
+	return selectionSet, nil
 }
 
 func (p *Parser) parseSelection() (ast.Selection, error) {
@@ -809,7 +809,7 @@ func (p *Parser) parseFragment() (ast.Selection, error) {
 }
 
 func (p *Parser) parseInlineFragment() (*ast.InlineFragment, error) {
-	inf := &ast.InlineFragment{
+	inlineFragment := &ast.InlineFragment{
 		Position: p.curToken.Start,
 	}
 
@@ -821,25 +821,25 @@ func (p *Parser) parseInlineFragment() (*ast.InlineFragment, error) {
 	if err != nil {
 		return nil, err
 	}
-	inf.TypeCondition = nt
+	inlineFragment.TypeCondition = nt
 
 	directives, err := p.parseDirectives()
 	if err != nil {
 		return nil, err
 	}
-	inf.Directives = directives
+	inlineFragment.Directives = directives
 
-	ss, err := p.parseSelectionSet()
+	selectionSet, err := p.parseSelectionSet()
 	if err != nil {
 		return nil, err
 	}
-	inf.SelectionSet = ss
+	inlineFragment.SelectionSet = selectionSet
 
-	return inf, nil
+	return inlineFragment, nil
 }
 
 func (p *Parser) parseNamedType() (*ast.NamedType, error) {
-	nt := &ast.NamedType{
+	namedType := &ast.NamedType{
 		Position: p.curToken.Start,
 	}
 
@@ -847,9 +847,9 @@ func (p *Parser) parseNamedType() (*ast.NamedType, error) {
 	if err != nil {
 		return nil, err
 	}
-	nt.Name = name
+	namedType.Name = name
 
-	return nt, nil
+	return namedType, nil
 }
 
 func (p *Parser) parseDirectives() ([]*ast.Directive, error) {
@@ -867,7 +867,7 @@ func (p *Parser) parseDirectives() ([]*ast.Directive, error) {
 }
 
 func (p *Parser) parseDirective() (*ast.Directive, error) {
-	dir := &ast.Directive{
+	directive := &ast.Directive{
 		Position: p.curToken.Start,
 	}
 
@@ -879,17 +879,17 @@ func (p *Parser) parseDirective() (*ast.Directive, error) {
 	if err != nil {
 		return nil, err
 	}
-	dir.Name = name
+	directive.Name = name
 
 	if p.curToken.Type == token.LPAREN {
 		args, err := p.parseArguments()
 		if err != nil {
 			return nil, err
 		}
-		dir.Arguments = args
+		directive.Arguments = args
 	}
 
-	return dir, nil
+	return directive, nil
 }
 
 func (p *Parser) parseArguments() ([]*ast.Argument, error) {
@@ -1010,7 +1010,7 @@ func (p *Parser) parseValue() (ast.Value, error) {
 }
 
 func (p *Parser) parseListValue() (ast.Value, error) {
-	list := &ast.ListValue{
+	listValue := &ast.ListValue{
 		Position: p.curToken.Start,
 	}
 
@@ -1023,18 +1023,18 @@ func (p *Parser) parseListValue() (ast.Value, error) {
 		if err != nil {
 			return nil, err
 		}
-		list.Values = append(list.Values, val)
+		listValue.Values = append(listValue.Values, val)
 	}
 
 	if err := p.expectAndAdvance(token.RBRACK); err != nil {
 		return nil, err
 	}
 
-	return list, nil
+	return listValue, nil
 }
 
 func (p *Parser) parseObjectValue() (ast.Value, error) {
-	obj := &ast.ObjectValue{
+	objValue := &ast.ObjectValue{
 		Position: p.curToken.Start,
 	}
 
@@ -1047,18 +1047,18 @@ func (p *Parser) parseObjectValue() (ast.Value, error) {
 		if err != nil {
 			return nil, err
 		}
-		obj.Fields = append(obj.Fields, field)
+		objValue.Fields = append(objValue.Fields, field)
 	}
 
 	if err := p.expectAndAdvance(token.RBRACE); err != nil {
 		return nil, err
 	}
 
-	return obj, nil
+	return objValue, nil
 }
 
 func (p *Parser) parseObjectField() (*ast.ObjectField, error) {
-	of := &ast.ObjectField{
+	objField := &ast.ObjectField{
 		Position: p.curToken.Start,
 	}
 
@@ -1066,7 +1066,7 @@ func (p *Parser) parseObjectField() (*ast.ObjectField, error) {
 	if err != nil {
 		return nil, err
 	}
-	of.Name = name
+	objField.Name = name
 
 	if err := p.expectAndAdvance(token.COLON); err != nil {
 		return nil, err
@@ -1076,9 +1076,9 @@ func (p *Parser) parseObjectField() (*ast.ObjectField, error) {
 	if err != nil {
 		return nil, err
 	}
-	of.Value = val
+	objField.Value = val
 
-	return of, nil
+	return objField, nil
 }
 
 func (p *Parser) parseVariable() (ast.Value, error) {
@@ -1100,7 +1100,7 @@ func (p *Parser) parseVariable() (ast.Value, error) {
 }
 
 func (p *Parser) parseFragmentSpread() (*ast.FragmentSpread, error) {
-	fs := &ast.FragmentSpread{
+	fragmentSpread := &ast.FragmentSpread{
 		Position: p.curToken.Start,
 	}
 
@@ -1108,15 +1108,15 @@ func (p *Parser) parseFragmentSpread() (*ast.FragmentSpread, error) {
 	if err != nil {
 		return nil, err
 	}
-	fs.Name = name
+	fragmentSpread.Name = name
 
 	directives, err := p.parseDirectives()
 	if err != nil {
 		return nil, err
 	}
-	fs.Directives = directives
+	fragmentSpread.Directives = directives
 
-	return fs, nil
+	return fragmentSpread, nil
 }
 
 /*
@@ -1156,7 +1156,7 @@ func (p *Parser) parseTypeSystemExtension() (ast.Definition, error) {
 }
 
 func (p *Parser) parseInputObjectTypeExtension() (ast.Definition, error) {
-	ext := &ast.InputObjectTypeExtension{
+	inputObjTypeExtension := &ast.InputObjectTypeExtension{
 		Position: p.curToken.Start,
 	}
 
@@ -1171,27 +1171,27 @@ func (p *Parser) parseInputObjectTypeExtension() (ast.Definition, error) {
 	if err != nil {
 		return nil, err
 	}
-	ext.Name = name
+	inputObjTypeExtension.Name = name
 
-	dirs, err := p.parseDirectives()
+	directives, err := p.parseDirectives()
 	if err != nil {
 		return nil, err
 	}
-	ext.Directives = dirs
+	inputObjTypeExtension.Directives = directives
 
 	if p.curToken.Type == token.LBRACE {
 		fields, err := p.parseInputFieldsDefinition()
 		if err != nil {
 			return nil, err
 		}
-		ext.Fields = fields
+		inputObjTypeExtension.Fields = fields
 	}
 
-	return ext, nil
+	return inputObjTypeExtension, nil
 }
 
 func (p *Parser) parseInputFieldsDefinition() ([]*ast.InputValueDefinition, error) {
-	var fields []*ast.InputValueDefinition
+	var inputValueDef []*ast.InputValueDefinition
 
 	if err := p.expectAndAdvance(token.LBRACE); err != nil {
 		return nil, err
@@ -1202,18 +1202,18 @@ func (p *Parser) parseInputFieldsDefinition() ([]*ast.InputValueDefinition, erro
 		if err != nil {
 			return nil, err
 		}
-		fields = append(fields, f)
+		inputValueDef = append(inputValueDef, f)
 	}
 
 	if err := p.expectAndAdvance(token.RBRACE); err != nil {
 		return nil, err
 	}
 
-	return fields, nil
+	return inputValueDef, nil
 }
 
 func (p *Parser) parseEnumTypeExtension() (ast.Definition, error) {
-	ext := &ast.EnumTypeExtension{
+	enumTypeExtension := &ast.EnumTypeExtension{
 		Position: p.curToken.Start,
 	}
 
@@ -1228,23 +1228,23 @@ func (p *Parser) parseEnumTypeExtension() (ast.Definition, error) {
 	if err != nil {
 		return nil, err
 	}
-	ext.Name = name
+	enumTypeExtension.Name = name
 
-	dirs, err := p.parseDirectives()
+	directives, err := p.parseDirectives()
 	if err != nil {
 		return nil, err
 	}
-	ext.Directives = dirs
+	enumTypeExtension.Directives = directives
 
 	if p.curToken.Type == token.LBRACE {
 		vals, err := p.parseEnumValuesDefinition()
 		if err != nil {
 			return nil, err
 		}
-		ext.Values = vals
+		enumTypeExtension.Values = vals
 	}
 
-	return ext, nil
+	return enumTypeExtension, nil
 }
 
 func (p *Parser) parseEnumValuesDefinition() ([]*ast.EnumValueDefinition, error) {
@@ -1297,7 +1297,7 @@ func (p *Parser) parseEnumValueDefinition() (*ast.EnumValueDefinition, error) {
 }
 
 func (p *Parser) parseUnionTypeExtension() (ast.Definition, error) {
-	ext := &ast.UnionTypeExtension{
+	unionTypeExtension := &ast.UnionTypeExtension{
 		Position: p.curToken.Start,
 	}
 
@@ -1312,27 +1312,27 @@ func (p *Parser) parseUnionTypeExtension() (ast.Definition, error) {
 	if err != nil {
 		return nil, err
 	}
-	ext.Name = name
+	unionTypeExtension.Name = name
 
-	dirs, err := p.parseDirectives()
+	directives, err := p.parseDirectives()
 	if err != nil {
 		return nil, err
 	}
-	ext.Directives = dirs
+	unionTypeExtension.Directives = directives
 
 	if p.curToken.Type == token.EQUALS {
 		types, err := p.parseUnionMemberTypes()
 		if err != nil {
 			return nil, err
 		}
-		ext.Types = types
+		unionTypeExtension.Types = types
 	}
 
-	if ext.Directives == nil && ext.Types == nil { // TODO: check length ?
+	if unionTypeExtension.Directives == nil && unionTypeExtension.Types == nil { // TODO: check length ?
 		return nil, fmt.Errorf("unexpected: %s", p.curToken.Literal) //TODO: fix msg see https://spec.graphql.org/draft/#UnionTypeDefinition
 	}
 
-	return ext, nil
+	return unionTypeExtension, nil
 }
 
 func (p *Parser) parseEnumValueName() (*ast.Name, error) {
@@ -1368,7 +1368,7 @@ func (p *Parser) parseUnionMemberTypes() ([]*ast.NamedType, error) {
 }
 
 func (p *Parser) parseInterfaceTypeExtension() (ast.Definition, error) {
-	ext := &ast.InterfaceTypeExtension{
+	interfaceTypeExtension := &ast.InterfaceTypeExtension{
 		Position: p.curToken.Start,
 	}
 
@@ -1383,39 +1383,39 @@ func (p *Parser) parseInterfaceTypeExtension() (ast.Definition, error) {
 	if err != nil {
 		return nil, err
 	}
-	ext.Name = name
+	interfaceTypeExtension.Name = name
 
 	if p.curToken.Literal == "implements" {
 		ii, err := p.parseImplementsInterfaces()
 		if err != nil {
 			return nil, err
 		}
-		ext.Interfaces = ii
+		interfaceTypeExtension.Interfaces = ii
 	}
 
-	dirs, err := p.parseDirectives()
+	directives, err := p.parseDirectives()
 	if err != nil {
 		return nil, err
 	}
-	ext.Directives = dirs
+	interfaceTypeExtension.Directives = directives
 
 	if p.curToken.Type == token.LBRACE {
 		fields, err := p.parseFieldsDefinition()
 		if err != nil {
 			return nil, err
 		}
-		ext.Fields = fields
+		interfaceTypeExtension.Fields = fields
 	}
 
-	if ext.Interfaces == nil && ext.Directives == nil && ext.Fields == nil {
+	if interfaceTypeExtension.Interfaces == nil && interfaceTypeExtension.Directives == nil && interfaceTypeExtension.Fields == nil {
 		return nil, fmt.Errorf("unexpected: %s", p.curToken.Literal) //TODO: fix msg see https://spec.graphql.org/draft/#InterfaceTypeExtension
 	}
 
-	return ext, nil
+	return interfaceTypeExtension, nil
 }
 
 func (p *Parser) parseSchemaExtension() (*ast.SchemaExtension, error) {
-	se := &ast.SchemaExtension{
+	schemaExtension := &ast.SchemaExtension{
 		Position: p.curToken.Start,
 	}
 
@@ -1430,7 +1430,7 @@ func (p *Parser) parseSchemaExtension() (*ast.SchemaExtension, error) {
 	if err != nil {
 		return nil, err
 	}
-	se.Directives = directives
+	schemaExtension.Directives = directives
 
 	if p.curToken.Type != token.LBRACE {
 		if err := p.next(); err != nil {
@@ -1438,11 +1438,11 @@ func (p *Parser) parseSchemaExtension() (*ast.SchemaExtension, error) {
 		}
 
 		for p.curToken.Type != token.RBRACE && p.curToken.Type != token.EOF {
-			root, err := p.parseRootOperationTypeDefinition()
+			def, err := p.parseRootOperationTypeDefinition()
 			if err != nil {
 				return nil, err
 			}
-			se.RootOperationDefs = append(se.RootOperationDefs, root)
+			schemaExtension.RootOperationDefs = append(schemaExtension.RootOperationDefs, def)
 		}
 
 		if err := p.expectAndAdvance(token.RBRACE); err != nil {
@@ -1450,11 +1450,11 @@ func (p *Parser) parseSchemaExtension() (*ast.SchemaExtension, error) {
 		}
 	}
 
-	return se, nil
+	return schemaExtension, nil
 }
 
 func (p *Parser) parseRootOperationTypeDefinition() (*ast.RootOperationTypeDefinition, error) {
-	root := &ast.RootOperationTypeDefinition{
+	rootOpTypeDef := &ast.RootOperationTypeDefinition{
 		Position: p.curToken.Start,
 	}
 
@@ -1462,23 +1462,23 @@ func (p *Parser) parseRootOperationTypeDefinition() (*ast.RootOperationTypeDefin
 	if err != nil {
 		return nil, err
 	}
-	root.OperationType = opType
+	rootOpTypeDef.OperationType = opType
 
 	if err := p.expectAndAdvance(token.COLON); err != nil {
 		return nil, err
 	}
 
-	nt, err := p.parseNamedType()
+	namedType, err := p.parseNamedType()
 	if err != nil {
 		return nil, err
 	}
-	root.Type = nt
+	rootOpTypeDef.Type = namedType
 
-	return root, nil
+	return rootOpTypeDef, nil
 }
 
 func (p *Parser) parseScalarTypeExtension() (*ast.ScalarTypeExtension, error) {
-	ext := &ast.ScalarTypeExtension{
+	scalarTypeExtension := &ast.ScalarTypeExtension{
 		Position: p.curToken.Start,
 	}
 
@@ -1493,22 +1493,22 @@ func (p *Parser) parseScalarTypeExtension() (*ast.ScalarTypeExtension, error) {
 	if err != nil {
 		return nil, err
 	}
-	ext.Name = name
+	scalarTypeExtension.Name = name
 
-	dir, err := p.parseDirectives()
+	directives, err := p.parseDirectives()
 	if err != nil {
 		return nil, err
 	}
-	if len(dir) == 0 { // TODO: Find out if we need this
+	if len(directives) == 0 { // TODO: Find out if we need this
 		return nil, fmt.Errorf("directives required")
 	}
-	ext.Directives = dir
+	scalarTypeExtension.Directives = directives
 
-	return ext, nil
+	return scalarTypeExtension, nil
 }
 
 func (p *Parser) parseObjectTypeExtension() (*ast.ObjectTypeExtension, error) {
-	ext := &ast.ObjectTypeExtension{
+	objTypeExtension := &ast.ObjectTypeExtension{
 		Position: p.curToken.Start,
 	}
 
@@ -1523,31 +1523,31 @@ func (p *Parser) parseObjectTypeExtension() (*ast.ObjectTypeExtension, error) {
 	if err != nil {
 		return nil, err
 	}
-	ext.Name = name
+	objTypeExtension.Name = name
 
 	if p.curToken.Literal == "implements" {
 		ii, err := p.parseImplementsInterfaces()
 		if err != nil {
 			return nil, err
 		}
-		ext.Interfaces = ii
+		objTypeExtension.Interfaces = ii
 	}
 
-	dir, err := p.parseDirectives()
+	directives, err := p.parseDirectives()
 	if err != nil {
 		return nil, err
 	}
-	ext.Directives = dir
+	objTypeExtension.Directives = directives
 
 	if p.curToken.Type == token.LBRACE {
 		fields, err := p.parseFieldsDefinition()
 		if err != nil {
 			return nil, err
 		}
-		ext.Fields = fields
+		objTypeExtension.Fields = fields
 	}
 
-	return ext, nil
+	return objTypeExtension, nil
 }
 
 func (p *Parser) parseImplementsInterfaces() ([]*ast.NamedType, error) {
@@ -1573,7 +1573,7 @@ func (p *Parser) parseImplementsInterfaces() ([]*ast.NamedType, error) {
 }
 
 func (p *Parser) parseFieldsDefinition() ([]*ast.FieldDefinition, error) {
-	var fields []*ast.FieldDefinition
+	var fieldsDef []*ast.FieldDefinition
 
 	if err := p.expectAndAdvance(token.LBRACE); err != nil {
 		return nil, err
@@ -1584,18 +1584,18 @@ func (p *Parser) parseFieldsDefinition() ([]*ast.FieldDefinition, error) {
 		if err != nil {
 			return nil, err
 		}
-		fields = append(fields, f)
+		fieldsDef = append(fieldsDef, f)
 	}
 
 	if err := p.expectAndAdvance(token.RBRACE); err != nil {
 		return nil, err
 	}
 
-	return fields, nil
+	return fieldsDef, nil
 }
 
 func (p *Parser) parseFieldDefinition() (*ast.FieldDefinition, error) {
-	f := &ast.FieldDefinition{
+	fieldDef := &ast.FieldDefinition{
 		Position: p.curToken.Start,
 	}
 
@@ -1604,21 +1604,21 @@ func (p *Parser) parseFieldDefinition() (*ast.FieldDefinition, error) {
 		if err != nil {
 			return nil, err
 		}
-		f.Description = desc
+		fieldDef.Description = desc
 	}
 
 	name, err := p.parseName()
 	if err != nil {
 		return nil, err
 	}
-	f.Name = name
+	fieldDef.Name = name
 
 	if p.curToken.Type == token.LPAREN {
 		args, err := p.parseArgumentsDefinition()
 		if err != nil {
 			return nil, err
 		}
-		f.Arguments = args
+		fieldDef.Arguments = args
 	}
 
 	if err := p.expectAndAdvance(token.COLON); err != nil {
@@ -1629,19 +1629,19 @@ func (p *Parser) parseFieldDefinition() (*ast.FieldDefinition, error) {
 	if err != nil {
 		return nil, err
 	}
-	f.Type = typ
+	fieldDef.Type = typ
 
 	directives, err := p.parseDirectives()
 	if err != nil {
 		return nil, err
 	}
-	f.Directives = directives
+	fieldDef.Directives = directives
 
-	return f, nil
+	return fieldDef, nil
 }
 
 func (p *Parser) parseArgumentsDefinition() ([]*ast.InputValueDefinition, error) {
-	var defs []*ast.InputValueDefinition
+	var argumentsDef []*ast.InputValueDefinition
 
 	if err := p.expectAndAdvance(token.LPAREN); err != nil {
 		return nil, err
@@ -1652,18 +1652,18 @@ func (p *Parser) parseArgumentsDefinition() ([]*ast.InputValueDefinition, error)
 		if err != nil {
 			return nil, err
 		}
-		defs = append(defs, def)
+		argumentsDef = append(argumentsDef, def)
 	}
 
 	if err := p.expectAndAdvance(token.RPAREN); err != nil {
 		return nil, err
 	}
 
-	return defs, nil
+	return argumentsDef, nil
 }
 
 func (p *Parser) parseInputValueDefinition() (*ast.InputValueDefinition, error) {
-	ivd := &ast.InputValueDefinition{
+	inputValueDef := &ast.InputValueDefinition{
 		Position: p.curToken.Start,
 	}
 
@@ -1672,14 +1672,14 @@ func (p *Parser) parseInputValueDefinition() (*ast.InputValueDefinition, error) 
 		if err != nil {
 			return nil, err
 		}
-		ivd.Description = desc
+		inputValueDef.Description = desc
 	}
 
 	name, err := p.parseName()
 	if err != nil {
 		return nil, err
 	}
-	ivd.Name = name
+	inputValueDef.Name = name
 
 	if err := p.expectAndAdvance(token.COLON); err != nil {
 		return nil, err
@@ -1689,7 +1689,7 @@ func (p *Parser) parseInputValueDefinition() (*ast.InputValueDefinition, error) 
 	if err != nil {
 		return nil, err
 	}
-	ivd.Type = typ
+	inputValueDef.Type = typ
 
 	if p.curToken.Type == token.EQUALS {
 		if err := p.next(); err != nil {
@@ -1699,16 +1699,16 @@ func (p *Parser) parseInputValueDefinition() (*ast.InputValueDefinition, error) 
 		if err != nil {
 			return nil, err
 		}
-		ivd.DefaultValue = val
+		inputValueDef.DefaultValue = val
 	}
 
 	directives, err := p.parseDirectives()
 	if err != nil {
 		return nil, err
 	}
-	ivd.Directives = directives
+	inputValueDef.Directives = directives
 
-	return ivd, nil
+	return inputValueDef, nil
 }
 
 func (p *Parser) parseDescription() (*ast.StringValue, error) {
@@ -1724,7 +1724,7 @@ func (p *Parser) parseStringValue() (*ast.StringValue, error) {
 		return nil, err
 	}
 
-	sv := &ast.StringValue{
+	strValue := &ast.StringValue{
 		Position: p.curToken.Start,
 		Value:    p.curToken.Literal,
 		Block:    p.curToken.Type == token.BLOCK_STRING,
@@ -1734,5 +1734,5 @@ func (p *Parser) parseStringValue() (*ast.StringValue, error) {
 		return nil, err
 	}
 
-	return sv, nil
+	return strValue, nil
 }

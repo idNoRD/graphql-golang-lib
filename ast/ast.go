@@ -310,11 +310,6 @@ func (d *DirectiveDefinition) End() int                  { return -1 }
 func (d *DirectiveDefinition) definitionNode()           {}
 func (d *DirectiveDefinition) typeSystemDefinitionNode() {}
 
-// DirectiveLocations
-//
-// https://spec.graphql.org/draft/#DirectiveLocations
-type DirectiveLocations []*Name
-
 // TypeSystemExtension
 //
 // https://spec.graphql.org/draft/#TypeSystemExtension
