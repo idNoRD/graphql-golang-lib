@@ -1005,7 +1005,7 @@ func (p *Parser) parseEnumValueName() (*ast.Name, error) {
 }
 
 func (p *Parser) parseUnionMemberTypes() (ast.UnionMemberTypes, error) {
-	if err := p.expectLiteralAndAdvance("implements"); err != nil {
+	if err := p.expectAndAdvance(token.EQUALS); err != nil {
 		return nil, err
 	}
 	var types ast.UnionMemberTypes
