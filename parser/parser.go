@@ -817,11 +817,11 @@ func (p *Parser) parseInlineFragment() (*ast.InlineFragment, error) {
 		return nil, err
 	}
 
-	typ, err := p.parseNamedType()
+	typeCond, err := p.parseNamedType()
 	if err != nil {
 		return nil, err
 	}
-	inlineFragment.TypeCondition = typ
+	inlineFragment.TypeCondition = typeCond
 
 	directives, err := p.parseDirectives()
 	if err != nil {
