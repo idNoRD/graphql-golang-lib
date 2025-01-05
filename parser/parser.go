@@ -76,7 +76,7 @@ func (p *Parser) expectAndNext(expectedToken token.Type) error {
 	return p.next()
 }
 
-func (p *Parser) expectLiteralAndAdvance(lit string) error {
+func (p *Parser) expectLiteralAndNext(lit string) error {
 	if p.curToken.Literal != lit {
 		return fmt.Errorf("expected %s, got %s", lit, p.curToken.Literal)
 	}
@@ -138,7 +138,7 @@ func (p *Parser) parseSchemaDefinition() (ast.Definition, error) {
 		schemaDef.Description = desc
 	}
 
-	if err := p.expectLiteralAndAdvance("schema"); err != nil {
+	if err := p.expectLiteralAndNext("schema"); err != nil {
 		return nil, err
 	}
 
@@ -180,7 +180,7 @@ func (p *Parser) parseScalarTypeDefinition() (ast.Definition, error) {
 		scalarTypeDef.Description = desc
 	}
 
-	if err := p.expectLiteralAndAdvance("scalar"); err != nil {
+	if err := p.expectLiteralAndNext("scalar"); err != nil {
 		return nil, err
 	}
 
@@ -212,7 +212,7 @@ func (p *Parser) parseObjectTypeDefinition() (ast.Definition, error) {
 		objTypeDef.Description = desc
 	}
 
-	if err := p.expectLiteralAndAdvance("type"); err != nil {
+	if err := p.expectLiteralAndNext("type"); err != nil {
 		return nil, err
 	}
 
@@ -260,7 +260,7 @@ func (p *Parser) parseInterfaceTypeDefinition() (ast.Definition, error) {
 		interfaceTypeDef.Description = desc
 	}
 
-	if err := p.expectLiteralAndAdvance("interface"); err != nil {
+	if err := p.expectLiteralAndNext("interface"); err != nil {
 		return nil, err
 	}
 
@@ -308,7 +308,7 @@ func (p *Parser) parseUnionTypeDefinition() (ast.Definition, error) {
 		unionTypeDef.Description = desc
 	}
 
-	if err := p.expectLiteralAndAdvance("union"); err != nil {
+	if err := p.expectLiteralAndNext("union"); err != nil {
 		return nil, err
 	}
 
@@ -348,7 +348,7 @@ func (p *Parser) parseEnumTypeDefinition() (ast.Definition, error) {
 		enumTypeDef.Description = desc
 	}
 
-	if err := p.expectLiteralAndAdvance("enum"); err != nil {
+	if err := p.expectLiteralAndNext("enum"); err != nil {
 		return nil, err
 	}
 
@@ -388,7 +388,7 @@ func (p *Parser) parseInputObjectTypeDefinition() (ast.Definition, error) {
 		inputObjTypeDef.Description = desc
 	}
 
-	if err := p.expectLiteralAndAdvance("input"); err != nil {
+	if err := p.expectLiteralAndNext("input"); err != nil {
 		return nil, err
 	}
 
@@ -428,7 +428,7 @@ func (p *Parser) parseDirectiveDefinition() (ast.Definition, error) {
 		directiveDef.Description = desc
 	}
 
-	if err := p.expectLiteralAndAdvance("directive"); err != nil {
+	if err := p.expectLiteralAndNext("directive"); err != nil {
 		return nil, err
 	}
 	if err := p.expectAndNext(token.AT); err != nil {
@@ -456,7 +456,7 @@ func (p *Parser) parseDirectiveDefinition() (ast.Definition, error) {
 		directiveDef.Repeatable = true
 	}
 
-	if err := p.expectLiteralAndAdvance("on"); err != nil {
+	if err := p.expectLiteralAndNext("on"); err != nil {
 		return nil, err
 	}
 
@@ -687,7 +687,7 @@ func (p *Parser) parseFragmentDefinition() (*ast.FragmentDefinition, error) {
 		Position: p.curToken.Start,
 	}
 
-	if err := p.expectLiteralAndAdvance("fragment"); err != nil {
+	if err := p.expectLiteralAndNext("fragment"); err != nil {
 		return nil, err
 	}
 
@@ -713,7 +713,7 @@ func (p *Parser) parseFragmentDefinition() (*ast.FragmentDefinition, error) {
 }
 
 func (p *Parser) parseTypeCondition() (*ast.NamedType, error) {
-	if err := p.expectLiteralAndAdvance("on"); err != nil {
+	if err := p.expectLiteralAndNext("on"); err != nil {
 		return nil, err
 	}
 	return p.parseNamedType()
@@ -1160,10 +1160,10 @@ func (p *Parser) parseInputObjectTypeExtension() (ast.Definition, error) {
 		Position: p.curToken.Start,
 	}
 
-	if err := p.expectLiteralAndAdvance("extend"); err != nil {
+	if err := p.expectLiteralAndNext("extend"); err != nil {
 		return nil, err
 	}
-	if err := p.expectLiteralAndAdvance("input"); err != nil {
+	if err := p.expectLiteralAndNext("input"); err != nil {
 		return nil, err
 	}
 
@@ -1217,10 +1217,10 @@ func (p *Parser) parseEnumTypeExtension() (ast.Definition, error) {
 		Position: p.curToken.Start,
 	}
 
-	if err := p.expectLiteralAndAdvance("extend"); err != nil {
+	if err := p.expectLiteralAndNext("extend"); err != nil {
 		return nil, err
 	}
-	if err := p.expectLiteralAndAdvance("enum"); err != nil {
+	if err := p.expectLiteralAndNext("enum"); err != nil {
 		return nil, err
 	}
 
@@ -1301,10 +1301,10 @@ func (p *Parser) parseUnionTypeExtension() (ast.Definition, error) {
 		Position: p.curToken.Start,
 	}
 
-	if err := p.expectLiteralAndAdvance("extend"); err != nil {
+	if err := p.expectLiteralAndNext("extend"); err != nil {
 		return nil, err
 	}
-	if err := p.expectLiteralAndAdvance("union"); err != nil {
+	if err := p.expectLiteralAndNext("union"); err != nil {
 		return nil, err
 	}
 
@@ -1372,10 +1372,10 @@ func (p *Parser) parseInterfaceTypeExtension() (ast.Definition, error) {
 		Position: p.curToken.Start,
 	}
 
-	if err := p.expectLiteralAndAdvance("extend"); err != nil {
+	if err := p.expectLiteralAndNext("extend"); err != nil {
 		return nil, err
 	}
-	if err := p.expectLiteralAndAdvance("interface"); err != nil {
+	if err := p.expectLiteralAndNext("interface"); err != nil {
 		return nil, err
 	}
 
@@ -1419,10 +1419,10 @@ func (p *Parser) parseSchemaExtension() (*ast.SchemaExtension, error) {
 		Position: p.curToken.Start,
 	}
 
-	if err := p.expectLiteralAndAdvance("extend"); err != nil {
+	if err := p.expectLiteralAndNext("extend"); err != nil {
 		return nil, err
 	}
-	if err := p.expectLiteralAndAdvance("schema"); err != nil {
+	if err := p.expectLiteralAndNext("schema"); err != nil {
 		return nil, err
 	}
 
@@ -1482,10 +1482,10 @@ func (p *Parser) parseScalarTypeExtension() (*ast.ScalarTypeExtension, error) {
 		Position: p.curToken.Start,
 	}
 
-	if err := p.expectLiteralAndAdvance("extend"); err != nil {
+	if err := p.expectLiteralAndNext("extend"); err != nil {
 		return nil, err
 	}
-	if err := p.expectLiteralAndAdvance("scalar"); err != nil {
+	if err := p.expectLiteralAndNext("scalar"); err != nil {
 		return nil, err
 	}
 
@@ -1512,10 +1512,10 @@ func (p *Parser) parseObjectTypeExtension() (*ast.ObjectTypeExtension, error) {
 		Position: p.curToken.Start,
 	}
 
-	if err := p.expectLiteralAndAdvance("extend"); err != nil {
+	if err := p.expectLiteralAndNext("extend"); err != nil {
 		return nil, err
 	}
-	if err := p.expectLiteralAndAdvance("type"); err != nil {
+	if err := p.expectLiteralAndNext("type"); err != nil {
 		return nil, err
 	}
 
@@ -1551,7 +1551,7 @@ func (p *Parser) parseObjectTypeExtension() (*ast.ObjectTypeExtension, error) {
 }
 
 func (p *Parser) parseImplementsInterfaces() ([]*ast.NamedType, error) {
-	if err := p.expectLiteralAndAdvance("implements"); err != nil {
+	if err := p.expectLiteralAndNext("implements"); err != nil {
 		return nil, err
 	}
 	var interfaces []*ast.NamedType
