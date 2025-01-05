@@ -817,11 +817,11 @@ func (p *Parser) parseInlineFragment() (*ast.InlineFragment, error) {
 		return nil, err
 	}
 
-	nt, err := p.parseNamedType()
+	typ, err := p.parseNamedType()
 	if err != nil {
 		return nil, err
 	}
-	inlineFragment.TypeCondition = nt
+	inlineFragment.TypeCondition = typ
 
 	directives, err := p.parseDirectives()
 	if err != nil {
@@ -1254,11 +1254,11 @@ func (p *Parser) parseEnumValuesDefinition() ([]*ast.EnumValueDefinition, error)
 
 	var vals []*ast.EnumValueDefinition
 	for p.curToken.Type != token.RBRACE && p.curToken.Type != token.EOF {
-		ev, err := p.parseEnumValueDefinition()
+		def, err := p.parseEnumValueDefinition()
 		if err != nil {
 			return nil, err
 		}
-		vals = append(vals, ev)
+		vals = append(vals, def)
 	}
 
 	if err := p.expectAndAdvance(token.RBRACE); err != nil {
@@ -1351,11 +1351,11 @@ func (p *Parser) parseUnionMemberTypes() ([]*ast.NamedType, error) {
 	}
 	var types []*ast.NamedType
 	for {
-		nt, err := p.parseNamedType()
+		typ, err := p.parseNamedType()
 		if err != nil {
 			return nil, err
 		}
-		types = append(types, nt)
+		types = append(types, typ)
 		if p.curToken.Type == token.PIPE {
 			if err := p.next(); err != nil {
 				return nil, err
@@ -1468,11 +1468,11 @@ func (p *Parser) parseRootOperationTypeDefinition() (*ast.RootOperationTypeDefin
 		return nil, err
 	}
 
-	namedType, err := p.parseNamedType()
+	typ, err := p.parseNamedType()
 	if err != nil {
 		return nil, err
 	}
-	rootOpTypeDef.Type = namedType
+	rootOpTypeDef.Type = typ
 
 	return rootOpTypeDef, nil
 }
@@ -1526,11 +1526,11 @@ func (p *Parser) parseObjectTypeExtension() (*ast.ObjectTypeExtension, error) {
 	objTypeExtension.Name = name
 
 	if p.curToken.Literal == "implements" {
-		ii, err := p.parseImplementsInterfaces()
+		interfaces, err := p.parseImplementsInterfaces()
 		if err != nil {
 			return nil, err
 		}
-		objTypeExtension.Interfaces = ii
+		objTypeExtension.Interfaces = interfaces
 	}
 
 	directives, err := p.parseDirectives()
@@ -1556,11 +1556,11 @@ func (p *Parser) parseImplementsInterfaces() ([]*ast.NamedType, error) {
 	}
 	var interfaces []*ast.NamedType
 	for {
-		nt, err := p.parseNamedType()
+		typ, err := p.parseNamedType()
 		if err != nil {
 			return nil, err
 		}
-		interfaces = append(interfaces, nt)
+		interfaces = append(interfaces, typ)
 		if p.curToken.Type == token.AMP {
 			if err := p.next(); err != nil {
 				return nil, err
@@ -1580,11 +1580,11 @@ func (p *Parser) parseFieldsDefinition() ([]*ast.FieldDefinition, error) {
 	}
 
 	for p.curToken.Type != token.RBRACE && p.curToken.Type != token.EOF {
-		f, err := p.parseFieldDefinition()
+		fieldDef, err := p.parseFieldDefinition()
 		if err != nil {
 			return nil, err
 		}
-		fieldsDef = append(fieldsDef, f)
+		fieldsDef = append(fieldsDef, fieldDef)
 	}
 
 	if err := p.expectAndAdvance(token.RBRACE); err != nil {
