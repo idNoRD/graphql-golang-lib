@@ -69,7 +69,7 @@ func (p *Parser) expectOneOf(expectedTokens ...token.Type) error {
 	return fmt.Errorf("expected one of [%s], got %s", strings.Join(expectedStrings, ", "), p.curToken.Type)
 }
 
-func (p *Parser) expectAndAdvance(expectedToken token.Type) error {
+func (p *Parser) expectAndNext(expectedToken token.Type) error {
 	if p.curToken.Type != expectedToken {
 		return fmt.Errorf("expected %s, got %s", expectedToken, p.curToken.Type)
 	}
@@ -148,7 +148,7 @@ func (p *Parser) parseSchemaDefinition() (ast.Definition, error) {
 	}
 	schemaDef.Directives = directives
 
-	if err := p.expectAndAdvance(token.LBRACE); err != nil {
+	if err := p.expectAndNext(token.LBRACE); err != nil {
 		return nil, err
 	}
 
@@ -160,7 +160,7 @@ func (p *Parser) parseSchemaDefinition() (ast.Definition, error) {
 		schemaDef.RootOperationDefs = append(schemaDef.RootOperationDefs, def)
 	}
 
-	if err := p.expectAndAdvance(token.RBRACE); err != nil {
+	if err := p.expectAndNext(token.RBRACE); err != nil {
 		return nil, err
 	}
 
@@ -431,7 +431,7 @@ func (p *Parser) parseDirectiveDefinition() (ast.Definition, error) {
 	if err := p.expectLiteralAndAdvance("directive"); err != nil {
 		return nil, err
 	}
-	if err := p.expectAndAdvance(token.AT); err != nil {
+	if err := p.expectAndNext(token.AT); err != nil {
 		return nil, err
 	}
 
@@ -559,7 +559,7 @@ func (p *Parser) parseName() (*ast.Name, error) {
 func (p *Parser) parseVariableDefinitions() ([]*ast.VariableDefinition, error) {
 	var varDefs []*ast.VariableDefinition
 
-	if err := p.expectAndAdvance(token.LPAREN); err != nil {
+	if err := p.expectAndNext(token.LPAREN); err != nil {
 		return nil, err
 	}
 
@@ -571,7 +571,7 @@ func (p *Parser) parseVariableDefinitions() ([]*ast.VariableDefinition, error) {
 		varDefs = append(varDefs, def)
 	}
 
-	if err := p.expectAndAdvance(token.RPAREN); err != nil {
+	if err := p.expectAndNext(token.RPAREN); err != nil {
 		return nil, err
 	}
 
@@ -593,7 +593,7 @@ func (p *Parser) parseVariableDefinition() (*ast.VariableDefinition, error) {
 	}
 	varDef.Variable = variable
 
-	if err := p.expectAndAdvance(token.COLON); err != nil {
+	if err := p.expectAndNext(token.COLON); err != nil {
 		return nil, err
 	}
 
@@ -637,7 +637,7 @@ func (p *Parser) parseType() (ast.Type, error) {
 			return nil, err
 		}
 
-		if err := p.expectAndAdvance(token.RBRACK); err != nil {
+		if err := p.expectAndNext(token.RBRACK); err != nil {
 			return nil, err
 		}
 
@@ -724,7 +724,7 @@ func (p *Parser) parseSelectionSet() (*ast.SelectionSet, error) {
 		Position: p.curToken.Start,
 	}
 
-	if err := p.expectAndAdvance(token.LBRACE); err != nil {
+	if err := p.expectAndNext(token.LBRACE); err != nil {
 		return nil, err
 	}
 
@@ -736,7 +736,7 @@ func (p *Parser) parseSelectionSet() (*ast.SelectionSet, error) {
 		selectionSet.Selections = append(selectionSet.Selections, selection)
 	}
 
-	if err := p.expectAndAdvance(token.RBRACE); err != nil {
+	if err := p.expectAndNext(token.RBRACE); err != nil {
 		return nil, err
 	}
 
@@ -871,7 +871,7 @@ func (p *Parser) parseDirective() (*ast.Directive, error) {
 		Position: p.curToken.Start,
 	}
 
-	if err := p.expectAndAdvance(token.AT); err != nil {
+	if err := p.expectAndNext(token.AT); err != nil {
 		return nil, err
 	}
 
@@ -895,7 +895,7 @@ func (p *Parser) parseDirective() (*ast.Directive, error) {
 func (p *Parser) parseArguments() ([]*ast.Argument, error) {
 	var args []*ast.Argument
 
-	if err := p.expectAndAdvance(token.LPAREN); err != nil {
+	if err := p.expectAndNext(token.LPAREN); err != nil {
 		return nil, err
 	}
 
@@ -907,7 +907,7 @@ func (p *Parser) parseArguments() ([]*ast.Argument, error) {
 		args = append(args, arg)
 	}
 
-	if err := p.expectAndAdvance(token.RPAREN); err != nil {
+	if err := p.expectAndNext(token.RPAREN); err != nil {
 		return nil, err
 	}
 
@@ -925,7 +925,7 @@ func (p *Parser) parseArgument() (*ast.Argument, error) {
 	}
 	arg.Name = name
 
-	if err := p.expectAndAdvance(token.COLON); err != nil {
+	if err := p.expectAndNext(token.COLON); err != nil {
 		return nil, err
 	}
 
@@ -1014,7 +1014,7 @@ func (p *Parser) parseListValue() (ast.Value, error) {
 		Position: p.curToken.Start,
 	}
 
-	if err := p.expectAndAdvance(token.LBRACK); err != nil {
+	if err := p.expectAndNext(token.LBRACK); err != nil {
 		return nil, err
 	}
 
@@ -1026,7 +1026,7 @@ func (p *Parser) parseListValue() (ast.Value, error) {
 		listValue.Values = append(listValue.Values, val)
 	}
 
-	if err := p.expectAndAdvance(token.RBRACK); err != nil {
+	if err := p.expectAndNext(token.RBRACK); err != nil {
 		return nil, err
 	}
 
@@ -1038,7 +1038,7 @@ func (p *Parser) parseObjectValue() (ast.Value, error) {
 		Position: p.curToken.Start,
 	}
 
-	if err := p.expectAndAdvance(token.LBRACE); err != nil {
+	if err := p.expectAndNext(token.LBRACE); err != nil {
 		return nil, err
 	}
 
@@ -1050,7 +1050,7 @@ func (p *Parser) parseObjectValue() (ast.Value, error) {
 		objValue.Fields = append(objValue.Fields, field)
 	}
 
-	if err := p.expectAndAdvance(token.RBRACE); err != nil {
+	if err := p.expectAndNext(token.RBRACE); err != nil {
 		return nil, err
 	}
 
@@ -1068,7 +1068,7 @@ func (p *Parser) parseObjectField() (*ast.ObjectField, error) {
 	}
 	objField.Name = name
 
-	if err := p.expectAndAdvance(token.COLON); err != nil {
+	if err := p.expectAndNext(token.COLON); err != nil {
 		return nil, err
 	}
 
@@ -1086,7 +1086,7 @@ func (p *Parser) parseVariable() (ast.Value, error) {
 		Position: p.curToken.Start,
 	}
 
-	if err := p.expectAndAdvance(token.DOLLAR); err != nil {
+	if err := p.expectAndNext(token.DOLLAR); err != nil {
 		return nil, err
 	}
 
@@ -1193,7 +1193,7 @@ func (p *Parser) parseInputObjectTypeExtension() (ast.Definition, error) {
 func (p *Parser) parseInputFieldsDefinition() ([]*ast.InputValueDefinition, error) {
 	var inputValueDef []*ast.InputValueDefinition
 
-	if err := p.expectAndAdvance(token.LBRACE); err != nil {
+	if err := p.expectAndNext(token.LBRACE); err != nil {
 		return nil, err
 	}
 
@@ -1205,7 +1205,7 @@ func (p *Parser) parseInputFieldsDefinition() ([]*ast.InputValueDefinition, erro
 		inputValueDef = append(inputValueDef, f)
 	}
 
-	if err := p.expectAndAdvance(token.RBRACE); err != nil {
+	if err := p.expectAndNext(token.RBRACE); err != nil {
 		return nil, err
 	}
 
@@ -1248,7 +1248,7 @@ func (p *Parser) parseEnumTypeExtension() (ast.Definition, error) {
 }
 
 func (p *Parser) parseEnumValuesDefinition() ([]*ast.EnumValueDefinition, error) {
-	if err := p.expectAndAdvance(token.LBRACE); err != nil {
+	if err := p.expectAndNext(token.LBRACE); err != nil {
 		return nil, err
 	}
 
@@ -1261,7 +1261,7 @@ func (p *Parser) parseEnumValuesDefinition() ([]*ast.EnumValueDefinition, error)
 		vals = append(vals, def)
 	}
 
-	if err := p.expectAndAdvance(token.RBRACE); err != nil {
+	if err := p.expectAndNext(token.RBRACE); err != nil {
 		return nil, err
 	}
 
@@ -1346,7 +1346,7 @@ func (p *Parser) parseEnumValueName() (*ast.Name, error) {
 }
 
 func (p *Parser) parseUnionMemberTypes() ([]*ast.NamedType, error) {
-	if err := p.expectAndAdvance(token.EQUALS); err != nil {
+	if err := p.expectAndNext(token.EQUALS); err != nil {
 		return nil, err
 	}
 	var types []*ast.NamedType
@@ -1445,7 +1445,7 @@ func (p *Parser) parseSchemaExtension() (*ast.SchemaExtension, error) {
 			schemaExtension.RootOperationDefs = append(schemaExtension.RootOperationDefs, def)
 		}
 
-		if err := p.expectAndAdvance(token.RBRACE); err != nil {
+		if err := p.expectAndNext(token.RBRACE); err != nil {
 			return nil, err
 		}
 	}
@@ -1464,7 +1464,7 @@ func (p *Parser) parseRootOperationTypeDefinition() (*ast.RootOperationTypeDefin
 	}
 	rootOpTypeDef.OperationType = opType
 
-	if err := p.expectAndAdvance(token.COLON); err != nil {
+	if err := p.expectAndNext(token.COLON); err != nil {
 		return nil, err
 	}
 
@@ -1575,7 +1575,7 @@ func (p *Parser) parseImplementsInterfaces() ([]*ast.NamedType, error) {
 func (p *Parser) parseFieldsDefinition() ([]*ast.FieldDefinition, error) {
 	var fieldsDef []*ast.FieldDefinition
 
-	if err := p.expectAndAdvance(token.LBRACE); err != nil {
+	if err := p.expectAndNext(token.LBRACE); err != nil {
 		return nil, err
 	}
 
@@ -1587,7 +1587,7 @@ func (p *Parser) parseFieldsDefinition() ([]*ast.FieldDefinition, error) {
 		fieldsDef = append(fieldsDef, fieldDef)
 	}
 
-	if err := p.expectAndAdvance(token.RBRACE); err != nil {
+	if err := p.expectAndNext(token.RBRACE); err != nil {
 		return nil, err
 	}
 
@@ -1621,7 +1621,7 @@ func (p *Parser) parseFieldDefinition() (*ast.FieldDefinition, error) {
 		fieldDef.Arguments = args
 	}
 
-	if err := p.expectAndAdvance(token.COLON); err != nil {
+	if err := p.expectAndNext(token.COLON); err != nil {
 		return nil, err
 	}
 
@@ -1643,7 +1643,7 @@ func (p *Parser) parseFieldDefinition() (*ast.FieldDefinition, error) {
 func (p *Parser) parseArgumentsDefinition() ([]*ast.InputValueDefinition, error) {
 	var argumentsDef []*ast.InputValueDefinition
 
-	if err := p.expectAndAdvance(token.LPAREN); err != nil {
+	if err := p.expectAndNext(token.LPAREN); err != nil {
 		return nil, err
 	}
 
@@ -1655,7 +1655,7 @@ func (p *Parser) parseArgumentsDefinition() ([]*ast.InputValueDefinition, error)
 		argumentsDef = append(argumentsDef, def)
 	}
 
-	if err := p.expectAndAdvance(token.RPAREN); err != nil {
+	if err := p.expectAndNext(token.RPAREN); err != nil {
 		return nil, err
 	}
 
@@ -1681,7 +1681,7 @@ func (p *Parser) parseInputValueDefinition() (*ast.InputValueDefinition, error) 
 	}
 	inputValueDef.Name = name
 
-	if err := p.expectAndAdvance(token.COLON); err != nil {
+	if err := p.expectAndNext(token.COLON); err != nil {
 		return nil, err
 	}
 
