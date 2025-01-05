@@ -89,7 +89,7 @@ func (p *Parser) parseDefinition() (ast.Definition, error) {
 	}
 
 	var tok token.Token
-	if isDescription(p.curToken.Type) {
+	if IsDescriptionToken(p.curToken.Type) {
 		tok = p.peekToken
 	} else {
 		tok = p.curToken
@@ -130,7 +130,7 @@ func (p *Parser) parseSchemaDefinition() (ast.Definition, error) {
 		Position: p.curToken.Start,
 	}
 
-	if isDescription(p.curToken.Type) {
+	if IsDescriptionToken(p.curToken.Type) {
 		desc, err := p.parseDescription()
 		if err != nil {
 			return nil, err
@@ -172,7 +172,7 @@ func (p *Parser) parseScalarTypeDefinition() (ast.Definition, error) {
 		Position: p.curToken.Start,
 	}
 
-	if isDescription(p.curToken.Type) {
+	if IsDescriptionToken(p.curToken.Type) {
 		desc, err := p.parseDescription()
 		if err != nil {
 			return nil, err
@@ -204,7 +204,7 @@ func (p *Parser) parseObjectTypeDefinition() (ast.Definition, error) {
 		Position: p.curToken.Start,
 	}
 
-	if isDescription(p.curToken.Type) {
+	if IsDescriptionToken(p.curToken.Type) {
 		desc, err := p.parseDescription()
 		if err != nil {
 			return nil, err
@@ -252,7 +252,7 @@ func (p *Parser) parseInterfaceTypeDefinition() (ast.Definition, error) {
 		Position: p.curToken.Start,
 	}
 
-	if isDescription(p.curToken.Type) {
+	if IsDescriptionToken(p.curToken.Type) {
 		desc, err := p.parseDescription()
 		if err != nil {
 			return nil, err
@@ -300,7 +300,7 @@ func (p *Parser) parseUnionTypeDefinition() (ast.Definition, error) {
 		Position: p.curToken.Start,
 	}
 
-	if isDescription(p.curToken.Type) {
+	if IsDescriptionToken(p.curToken.Type) {
 		desc, err := p.parseDescription()
 		if err != nil {
 			return nil, err
@@ -340,7 +340,7 @@ func (p *Parser) parseEnumTypeDefinition() (ast.Definition, error) {
 		Position: p.curToken.Start,
 	}
 
-	if isDescription(p.curToken.Type) {
+	if IsDescriptionToken(p.curToken.Type) {
 		desc, err := p.parseDescription()
 		if err != nil {
 			return nil, err
@@ -380,7 +380,7 @@ func (p *Parser) parseInputObjectTypeDefinition() (ast.Definition, error) {
 		Position: p.curToken.Start,
 	}
 
-	if isDescription(p.curToken.Type) {
+	if IsDescriptionToken(p.curToken.Type) {
 		desc, err := p.parseDescription()
 		if err != nil {
 			return nil, err
@@ -420,7 +420,7 @@ func (p *Parser) parseDirectiveDefinition() (ast.Definition, error) {
 		Position: p.curToken.Start,
 	}
 
-	if isDescription(p.curToken.Type) {
+	if IsDescriptionToken(p.curToken.Type) {
 		desc, err := p.parseDescription()
 		if err != nil {
 			return nil, err
@@ -1273,7 +1273,7 @@ func (p *Parser) parseEnumValueDefinition() (*ast.EnumValueDefinition, error) {
 		Position: p.curToken.Start,
 	}
 
-	if isDescription(p.curToken.Type) {
+	if IsDescriptionToken(p.curToken.Type) {
 		desc, err := p.parseDescription()
 		if err != nil {
 			return nil, err
@@ -1599,7 +1599,7 @@ func (p *Parser) parseFieldDefinition() (*ast.FieldDefinition, error) {
 		Position: p.curToken.Start,
 	}
 
-	if isDescription(p.curToken.Type) {
+	if IsDescriptionToken(p.curToken.Type) {
 		desc, err := p.parseDescription()
 		if err != nil {
 			return nil, err
@@ -1667,7 +1667,7 @@ func (p *Parser) parseInputValueDefinition() (*ast.InputValueDefinition, error) 
 		Position: p.curToken.Start,
 	}
 
-	if isDescription(p.curToken.Type) {
+	if IsDescriptionToken(p.curToken.Type) {
 		desc, err := p.parseDescription()
 		if err != nil {
 			return nil, err
